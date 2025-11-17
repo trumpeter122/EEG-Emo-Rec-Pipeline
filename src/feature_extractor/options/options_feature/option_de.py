@@ -4,10 +4,18 @@ import numpy as np
 from scipy import signal
 
 from config import (
-    BANDS,
     GENEVA_32,
     SFREQ,
 )
+
+# Match the reference DEAP pipeline bandpass configuration.
+DE_BANDS: dict[str, tuple[int, int]] = {
+    "theta": (4, 8),
+    "slow_alpha": (8, 10),
+    "alpha": (8, 12),
+    "beta": (12, 30),
+    "gamma": (30, 45),
+}
 
 
 def _extract_de(trial_data: np.ndarray, channel_pick: list[str]) -> np.ndarray:
@@ -36,12 +44,12 @@ def _extract_de(trial_data: np.ndarray, channel_pick: list[str]) -> np.ndarray:
     x = trial_data[ch_indices, :]  # (n_channels_used, n_samples)
 
     n_ch, _ = x.shape
-    n_bands = len(BANDS)
+    n_bands = len(DE_BANDS)
     feats = np.zeros((n_ch, n_bands), dtype=np.float32)
 
     nyq = 0.5 * SFREQ
 
-    for bi, (band_name, (fmin, fmax)) in enumerate(BANDS.items()):
+    for bi, (_, (fmin, fmax)) in enumerate(DE_BANDS.items()):
         low, high = fmin / nyq, fmax / nyq
         b, a = signal.butter(N=4, Wn=[low, high], btype="band")
 

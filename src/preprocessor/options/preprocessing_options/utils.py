@@ -42,7 +42,7 @@ def _epoch_and_resample(
         tmin=EPOCH_TMIN,
         tmax=EPOCH_TMAX,
         picks=eeg_channels,
-        baseline=(0,0),
+        baseline=(0, 0),
         preload=True,
         verbose=False,
     )

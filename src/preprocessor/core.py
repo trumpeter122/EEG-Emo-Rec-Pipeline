@@ -21,7 +21,7 @@ def _preprocess_subjects(
 
     for subject_id in track(
         iterable=range(1, 33),
-        description=f"Preprocessing with option `{preprocessing_option.name}`",
+        description=f"Preprocessing with option {{{preprocessing_option.name}}}",
         context="Preprocessor",
     ):
         out_path = _subject_npy_path(folder=out_folder, subject_id=subject_id)
@@ -57,7 +57,7 @@ def _split_trials(preprocessing_option: PreprocessingOption) -> None:
     for f in track(
         iterable=npy_files,
         description="Splitting subject into trials for "
-        f"option `{preprocessing_option.name}`",
+        f"option {{{preprocessing_option.name}}}",
         context="Preprocessor",
     ):
         subject_id = int(f.stem[1:3])
