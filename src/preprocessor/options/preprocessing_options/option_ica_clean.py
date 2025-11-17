@@ -36,7 +36,7 @@ def _ica_clean_bdf(
         tmin=EPOCH_TMIN,
         tmax=EPOCH_TMAX,
         picks=eeg_channels,
-        baseline=(0,0),
+        baseline=None,
         preload=True,
         verbose=False,
     )

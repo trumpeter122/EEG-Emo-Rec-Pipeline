@@ -87,7 +87,7 @@ def _split_trials(preprocessing_option: PreprocessingOption) -> None:
             )
 
             trial_counter += 1
-            out_name = f"t{trial_counter:02}.joblib"
+            out_name = f"t{trial_counter:04}.joblib"
             out_path = target_folder / out_name
             if not out_path.exists():
                 joblib.dump(trial_df, out_path, compress=3)

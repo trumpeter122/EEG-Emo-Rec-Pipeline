@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 
 from config import (
+    BASELINE_SEC,
     SFREQ,
     FeatureExtractionOption,
 )
@@ -12,7 +13,7 @@ from utils import track
 def _extract_feature(
     trial_df: pd.DataFrame,
     feature_extraction_option: FeatureExtractionOption,
-) -> pd.DataFrame:
+) -> (np.ndarray, pd.DataFrame):
     """
     Slice a single trial into overlapping segments and compute features
     for each segment.
@@ -34,35 +35,42 @@ def _extract_feature(
     if n_samples < window:
         raise ValueError("time_window is longer than the trial length.")
 
-    # Split trial_data into overlapping segments
-    starts = np.arange(0, n_samples - window + 1, step, dtype=int)
-    segments_features: list[np.ndarray] = []
+    baseline_samples = int(BASELINE_SEC * SFREQ)
+    if window > baseline_samples:
+        raise ValueError("time_window exceeds available baseline duration.")
 
-    for s in starts:
-        segment = trial_data[:, s : s + window]  # (n_channels_total, window)
-        segment_features = fe_method(segment)
-        segments_features.append(segment_features)
+    # Baseline segment: last window within the baseline portion
+    baseline_start = max(baseline_samples - window, 0)
+    baseline_segment = trial_data[:, baseline_start : baseline_start + window]
+    baseline_feature = fe_method(baseline_segment)
 
-    if not segments_features:
-        raise ValueError("No segments were generated; check time_window and time_step.")
+    # Trial segments: start immediately after baseline
+    trial_start = baseline_samples
+    if trial_start >= n_samples:
+        raise ValueError("trial segment starts beyond the available samples.")
 
-    # Stack to (feature shape, n_segments)
-    features = np.stack(segments_features, axis=-1)
+    trial_starts = np.arange(trial_start, n_samples - window + 1, step, dtype=int)
+    trial_features: list[np.ndarray] = []
+    for s in trial_starts:
+        segment = trial_data[:, s : s + window]
+        trial_features.append(fe_method(segment))
 
-    # Build output DataFrame: keep original columns, add 'features'
-    out_row = trial.copy()
-    out_row["data"] = features
-    out_df = pd.DataFrame([out_row])
+    if not trial_features:
+        raise ValueError(
+            "No trial segments were generated; check time_window and time_step."
+        )
 
-    # Split each data array into slices along the last axis
-    out_df["data"] = out_df["data"].apply(
-        lambda a: [a[..., i] for i in range(a.shape[-1])]
+    out_df = pd.DataFrame(
+        {
+            "data": [trial_features],
+            **{col: trial[col] for col in trial.index if col != "data"},
+        }
     )
 
     # Explode so each segment slice becomes its own row
-    out_df = out_df.explode("data", ignore_index=True)
+    out_df = out_df.explode(["data"], ignore_index=True)
 
-    return out_df
+    return baseline_feature, out_df
 
 
 def run_feature_extractor(
@@ -72,7 +80,7 @@ def run_feature_extractor(
 
     trials_path = preprocessing_option.get_trial_path()
     features_path = preprocessing_option.get_feature_path()
-    trial_files = list(trials_path.glob("*.joblib"))
+    trial_files = sorted(trials_path.glob("*.joblib"))
     for trial_file in track(
         iterable=trial_files,
         description=f"Extracting feature with option {feature_extraction_option.name}"
@@ -81,14 +89,21 @@ def run_feature_extractor(
     ):
         out_dir_path = features_path / feature_extraction_option.name
         out_dir_path.mkdir(exist_ok=True)
-
         out_name = f"{trial_file.stem}.joblib"
         out_path = out_dir_path / out_name
-        if not out_path.exists():
+
+        baseline_out_dir_path = out_dir_path / "baseline"
+        baseline_out_dir_path.mkdir(exist_ok=True)
+        baseline_out_name = f"{trial_file.stem}.npy"
+        baseline_out_path = baseline_out_dir_path / baseline_out_name
+
+        if not (out_path.exists() and baseline_out_path.exists()):
             trial_df = joblib.load(trial_file)
 
-            feature_df = _extract_feature(
+            baseline_array, feature_df = _extract_feature(
                 trial_df=trial_df, feature_extraction_option=feature_extraction_option
             )
+
+            np.save(baseline_out_path, baseline_array)
 
             joblib.dump(feature_df, out_path, compress=3)

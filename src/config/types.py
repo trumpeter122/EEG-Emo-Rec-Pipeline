@@ -5,7 +5,7 @@ from pathlib import Path
 import mne
 import numpy as np
 
-from .constants import DEAP_ROOT, GENEVA_32
+from .constants import BASELINE_SEC, DEAP_ROOT, GENEVA_32
 
 
 class OptionList(list):
@@ -71,7 +71,7 @@ class FeatureOption:
         self,
         name: str,
         feature_channel_extraction_method: Callable[
-            [list[str]], Callable[[np.ndarray], np.ndarray]
+            [np.ndarray, list[str]], np.ndarray
         ],
     ):
         self.name = name
@@ -80,6 +80,9 @@ class FeatureOption:
 
 class SegmentationOption:
     def __init__(self, time_window: float, time_step: float):
+        if time_window > BASELINE_SEC:
+            raise ValueError("Window cannot be longer than the baseline seconds (5s)")
+
         self.name = f"{time_window:.2f}s_{time_step:.2f}s"
         self.time_window = time_window
         self.time_step = time_step
