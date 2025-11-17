@@ -2,10 +2,19 @@ import numpy as np
 from scipy import signal
 
 from config import (
-    BANDS,
     GENEVA_32,
     SFREQ,
 )
+
+# Frequency bins follow the original DEAP feature script where Welch spectra
+# are averaged over integer-Hz bins with inclusive upper bounds.
+PSD_BANDS: dict[str, tuple[int, int]] = {
+    "theta": (4, 7),
+    "slow_alpha": (8, 10),
+    "alpha": (8, 13),
+    "beta": (14, 29),
+    "gamma": (30, 45),
+}
 
 
 def _extract_psd(trial_data: np.ndarray, channel_pick: list[str]) -> np.ndarray:
@@ -34,7 +43,7 @@ def _extract_psd(trial_data: np.ndarray, channel_pick: list[str]) -> np.ndarray:
     x = trial_data[ch_indices, :]  # (n_channels_used, n_samples)
 
     n_ch, n_samples = x.shape
-    n_bands = len(BANDS)
+    n_bands = len(PSD_BANDS)
     feats = np.zeros((n_ch, n_bands), dtype=np.float32)
 
     for ci in range(n_ch):
@@ -46,12 +55,14 @@ def _extract_psd(trial_data: np.ndarray, channel_pick: list[str]) -> np.ndarray:
 
         # Band averages (same as _band_means in __init__.py)
         band_vals = []
-        for fmin, fmax in BANDS.values():
-            mask = (freqs >= fmin) & (freqs < fmax)
-            if np.any(mask):
-                band_vals.append(float(np.mean(Pxx[mask])))
-            else:
-                band_vals.append(np.nan)
+        for fmin, fmax in PSD_BANDS.values():
+            mask = (freqs >= fmin) & (freqs <= fmax)
+            if not np.any(mask):
+                raise RuntimeError(
+                    f"No frequency bins found for PSD band {fmin}-{fmax} Hz "
+                    f"(nperseg={nperseg}, available up to {freqs.max():.2f} Hz)"
+                )
+            band_vals.append(float(np.mean(Pxx[mask])))
         feats[ci, :] = np.asarray(band_vals, dtype=np.float32)
 
     return feats

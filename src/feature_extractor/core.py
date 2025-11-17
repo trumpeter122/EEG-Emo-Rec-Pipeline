@@ -49,7 +49,9 @@ def _extract_feature(
     if trial_start >= n_samples:
         raise ValueError("trial segment starts beyond the available samples.")
 
-    trial_starts = np.arange(trial_start, n_samples - window + 1, step, dtype=int)
+    trial_samples = n_samples - baseline_samples
+    relative_starts = np.arange(0, trial_samples - window, step, dtype=int)
+    trial_starts = trial_start + relative_starts
     trial_features: list[np.ndarray] = []
     for s in trial_starts:
         segment = trial_data[:, s : s + window]
@@ -83,8 +85,9 @@ def run_feature_extractor(
     trial_files = sorted(trials_path.glob("*.joblib"))
     for trial_file in track(
         iterable=trial_files,
-        description=f"Extracting feature with option {feature_extraction_option.name}"
-        f" for option `{preprocessing_option.name}`",
+        description="Extracting feature with"
+        f"option {{{feature_extraction_option.name}}} for "
+        f"option {{{preprocessing_option.name}}}",
         context="Feature Extractor",
     ):
         out_dir_path = features_path / feature_extraction_option.name

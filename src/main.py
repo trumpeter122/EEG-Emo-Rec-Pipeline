@@ -6,7 +6,7 @@ if __name__ == "__main__":
     from preprocessor.options import PREPROCESSING_OPTIONS
 
     run_preprocessor(PREPROCESSING_OPTIONS.get_name("clean"))
-    run_preprocessor(PREPROCESSING_OPTIONS.get_name("ica_clean"))
+    # run_preprocessor(PREPROCESSING_OPTIONS.get_name("ica_clean"))
 
     # import joblib
 
@@ -26,13 +26,24 @@ if __name__ == "__main__":
     from itertools import product
     import random
 
-    ppop = PREPROCESSING_OPTIONS.get_name("clean")
+    feop_keys = [
+        "preprocessing_option",
+        "feature_option",
+        "channel_pick_option",
+        "segmentation_option",
+    ]
+    feop_values = [
+        [PREPROCESSING_OPTIONS.get_name("clean")],
+        FEATURE_OPTIONS,
+        [CHANNEL_PICK_OPTIONS.get_name("balanced_classic_6")],
+        SEGMENTATION_OPTIONS,
+    ]
 
-    feop = FeatureExtractionOption(
-        preprocessing_option=ppop,
-        feature_option=FEATURE_OPTIONS.get_name("psd"),
-        channel_pick_option=CHANNEL_PICK_OPTIONS.get_name("standard_32"),
-        segmentation_option=SEGMENTATION_OPTIONS.get_name("2.00s_0.25s"),
-    )
+    feop_combos = [
+        dict(zip(feop_keys, feop_combo)) for feop_combo in product(*feop_values)
+    ]
 
-    run_feature_extractor(feop)
+    for combo in feop_combos:
+        feop = FeatureExtractionOption(**combo)
+
+        run_feature_extractor(feop)
