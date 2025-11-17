@@ -1,20 +1,12 @@
 from pathlib import Path
 
 # Data layout
-_source_paths: list[Path] = [
-    DEAP_ROOT := Path("./data/DEAP"),
-    DEAP_ORIGINAL := DEAP_ROOT / "DEAP-Dataset" / "data_original",
-    DEAP_RATINGS_CSV := (
-        DEAP_ROOT / "DEAP-Dataset" / "metadata_csv" / "participant_ratings.csv"
-    ),
-    DEAP_CHANNELS_XLSX := (
-        DEAP_ROOT / "additional-information" / "DEAP_EEG_channels.xlsx"
-    ),
-]
-
-for _path in _source_paths:
-    if not _path.exists():
-        raise FileNotFoundError(f"{_path} does not exist")
+DEAP_ROOT = Path("./data/DEAP")
+DEAP_ORIGINAL = DEAP_ROOT / "DEAP-Dataset" / "data_original"
+DEAP_RATINGS_CSV = (
+    DEAP_ROOT / "DEAP-Dataset" / "metadata_csv" / "participant_ratings.csv"
+)
+DEAP_CHANNELS_XLSX = DEAP_ROOT / "additional-information" / "DEAP_EEG_channels.xlsx"
 
 # DEAP specifics
 TRIALS_NUM: int = 40
