@@ -7,6 +7,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, TypeVar, overload
 
+import pandas as pd  # type: ignore[import-untyped]
+
 from .constants import BASELINE_SEC, DEAP_ROOT, GENEVA_32
 
 if TYPE_CHECKING:
@@ -315,6 +317,26 @@ class FeatureExtractionOption:
 
         return _extract
 
+    def get_path(self) -> Path:
+        path = self.preprocessing_option.get_feature_path() / self.name
+        path.mkdir(exist_ok=True)
+        return path
+
+    def get_metadata_path(self) -> Path:
+        return self.get_path() / "metadata"
+
+    def get_metadata_baseline_path(self) -> Path:
+        return self.get_metadata_path() / "baseline"
+
+    def get_metadata_params_path(self) -> Path:
+        return self.get_metadata_path() / "params.json"
+
+    def get_metadata_metrics_path(self) -> Path:
+        return self.get_metadata_path() / "metrics.json"
+
+    def get_metadata_shape_path(self) -> Path:
+        return self.get_metadata_path() / "shape.csv"
+
     def to_params(self) -> dict[str, Any]:
         """Serialize the aggregation of the underlying option metadata."""
         return {
@@ -339,7 +361,22 @@ class TrainingOption:
     """Placeholder describing a set of training hyperparameters."""
 
     feature_extraction_option: FeatureExtractionOption
-    name: str
+    name: str = field(init=False)
+    # train_test_split: float = field()
+    # use_data: float = field()
+    length_data: int = field(init=False)
+
+    def __post_init__(self):
+        shape = pd.read_csv(self.feature_extraction_option.get_metadata_shape_path())
+        print(shape)
+        # if [shape['segments'].unique()]
+        # n_segments =
+        # check train test and use data
+
+        # generate training dataset
+        # generate testing dataset
+
+        pass
 
 
 @dataclass(slots=True)

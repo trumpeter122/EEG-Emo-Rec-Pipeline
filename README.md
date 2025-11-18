@@ -1,3 +1,9 @@
+## Designs
+
+- Modular
+
+- Atomic writing to file system
+
 ## Guidelines
 
 - Consistency: 
@@ -20,6 +26,8 @@
   
   - Pass keyword arguments instead of positional arguments except for very mundane function calls like `print()`
 
+- Linting & Formatting: Run `uv run ruff format src && uv run ruff check --fix src && uv run mypy src && uv run pyright src`
+
 - Modularity: Ensure modular structure
 
 - Style: Write clear, human-readable codes; prioritize readability
@@ -27,3 +35,7 @@
 - Typing: Implement full-typing
 
 - Verbosity: No printing by default
+
+## Potential TODOs
+
+- metadata for preprocessor
