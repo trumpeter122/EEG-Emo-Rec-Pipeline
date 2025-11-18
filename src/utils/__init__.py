@@ -14,6 +14,14 @@ if TYPE_CHECKING:
 __all__ = ["track"]
 
 
+def message(description: str, context: str) -> None:
+    console = Console()
+    console.print(
+        f"[bold yellow]--{context}--[/bold yellow]\n"
+        f"[bold blue]{description}[/bold blue]",
+    )
+
+
 def track[TrackItem](
     iterable: Iterable[TrackItem],
     *,

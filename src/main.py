@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from itertools import product
 
-from config import FeatureExtractionOption
+from config import FeatureExtractionOption, TrainingOption
 from feature_extractor import (
     CHANNEL_PICK_OPTIONS,
     FEATURE_OPTIONS,
@@ -19,9 +19,9 @@ import json
 def _run_extraction_examples() -> None:
     """Execute a small subset of preprocessing + feature extraction variants."""
     run_preprocessor(preprocessing_option=PREPROCESSING_OPTIONS.get_name(name="clean"))
-    run_preprocessor(
-        preprocessing_option=PREPROCESSING_OPTIONS.get_name(name="ica_clean"),
-    )
+    # run_preprocessor(
+    #     preprocessing_option=PREPROCESSING_OPTIONS.get_name(name="ica_clean"),
+    # )
 
     feop_keys = [
         "preprocessing_option",
@@ -31,7 +31,7 @@ def _run_extraction_examples() -> None:
     ]
     feop_values = [
         PREPROCESSING_OPTIONS.get_names(names=["clean"]),
-        FEATURE_OPTIONS,
+        FEATURE_OPTIONS.get_names(["psd"]),
         CHANNEL_PICK_OPTIONS.get_names(names=["standard_32"]),
         SEGMENTATION_OPTIONS,
     ]
@@ -42,8 +42,11 @@ def _run_extraction_examples() -> None:
 
     for combo in feop_combos:
         fe_option = FeatureExtractionOption(**combo)
-        print(json.dumps(fe_option.to_params(), indent=2))
         run_feature_extractor(feature_extraction_option=fe_option)
+
+        print(fe_option.name)
+
+        TrainingOption(feature_extraction_option=fe_option)
 
 
 if __name__ == "__main__":
