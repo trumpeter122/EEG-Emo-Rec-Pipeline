@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from config import FeatureOption
+from feature_extractor.types import FeatureOption
 
 from .option_psd import _extract_psd
 from .utils import _available_pairs

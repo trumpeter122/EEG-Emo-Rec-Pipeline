@@ -7,7 +7,8 @@ import math
 import numpy as np
 from scipy import signal  # type: ignore[import-untyped]
 
-from config import GENEVA_32, SFREQ, FeatureOption
+from config import GENEVA_32, SFREQ
+from feature_extractor.types import FeatureOption
 
 __all__ = ["_de"]
 

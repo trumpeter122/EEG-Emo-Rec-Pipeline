@@ -3,7 +3,8 @@
 import mne  # type: ignore[import-untyped]
 import numpy as np
 
-from config import SFREQ_TARGET, PreprocessingOption
+from config import SFREQ_TARGET
+from preprocessor.types import PreprocessingOption
 
 from .utils import (
     _base_bdf_process,

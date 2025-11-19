@@ -8,8 +8,8 @@ from config import (
     EPOCH_TMAX,
     EPOCH_TMIN,
     SFREQ_TARGET,
-    PreprocessingOption,
 )
+from preprocessor.types import PreprocessingOption
 
 from .utils import (
     _apply_filter_reference,

@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import joblib  # type: ignore[import-untyped]
 import numpy as np
 import pandas as pd  # type: ignore[import-untyped]
 
-from config import DEAP_RATINGS_CSV, TRIALS_NUM, PreprocessingOption
+from config import DEAP_RATINGS_CSV, TRIALS_NUM
 from utils import message, track
 from utils.fs import atomic_directory, directory_is_populated
+
+if TYPE_CHECKING:
+    from preprocessor.types import PreprocessingOption
 
 from .utils import (
     _load_raw_subject,
