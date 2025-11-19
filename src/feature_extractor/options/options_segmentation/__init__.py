@@ -1,9 +1,7 @@
 """Available segmentation strategies for the sliding-window extractor."""
 
-from config import (
-    OptionList,
-    SegmentationOption,
-)
+from config.option_utils import OptionList
+from feature_extractor.types import SegmentationOption
 
 __all__ = ["SEGMENTATION_OPTIONS"]
 

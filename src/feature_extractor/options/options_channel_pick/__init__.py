@@ -1,10 +1,8 @@
 """Predefined channel pick configurations."""
 
-from config import (
-    GENEVA_32,
-    ChannelPickOption,
-    OptionList,
-)
+from config import GENEVA_32
+from config.option_utils import OptionList
+from feature_extractor.types import ChannelPickOption
 
 __all__ = ["CHANNEL_PICK_OPTIONS"]
 

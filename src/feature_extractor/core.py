@@ -6,19 +6,18 @@ import csv
 import json
 import time
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import joblib  # type: ignore[import-untyped]
 import numpy as np
 import pandas as pd  # type: ignore[import-untyped]
 
-from config import (
-    BASELINE_SEC,
-    SFREQ,
-    FeatureExtractionOption,
-)
+from config import BASELINE_SEC, SFREQ
 from utils import message, track
 from utils.fs import atomic_directory, directory_is_populated
+
+if TYPE_CHECKING:
+    from feature_extractor.types import FeatureExtractionOption
 
 __all__ = ["run_feature_extractor"]
 
@@ -205,8 +204,6 @@ def run_feature_extractor(
             )
 
         shape_fieldnames = [
-            "trial",
-            "filename",
             "trial_data_shape",
             "baseline_shape",
             "segment_shape",
