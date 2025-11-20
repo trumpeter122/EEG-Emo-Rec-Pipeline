@@ -59,6 +59,7 @@ The `config` package also contains `constants.py` with DEAP-specific parameters 
   - `training_data.py` constructs datasets from joblib frames, including scaling, target encoding, and split generation.  
   - `training_method.py`, `training.py`, `model.py`, and `model_training.py` encapsulate optimization configs, dataloader wiring, model construction, and artifact locations respectively.
 - **Options (`model_trainer/options/`)** – `options_model` registers neural architectures (currently `CNN1D_N1`), while `options_training_method` lists optimizer/criterion configs for regression and classification. New training methods belong here.
+- **Model inputs** – Every architecture must tolerate arbitrary segment shapes (different channel picks / window sizes). Follow the `CNN1D_N1` example by flattening dynamically and using `nn.LazyLinear` so no layer assumes a fixed length.
 - **Core (`model_trainer/core.py`)** – houses the training loop, evaluation helpers, and metric calculations. It validates class counts vs. model output sizes and saves checkpoints atomically through `utils.fs.atomic_directory`.
 
 ### Pipeline Runner
@@ -92,7 +93,7 @@ This design keeps `main.py` declarative. Adding CLI arguments or YAML-based expe
 4. `build_feature_extraction_options` will automatically generate the cross-product once the option is registered.
 
 ### Adding Models or Training Methods
-1. Define the model class (e.g., under `model_trainer/options/options_model/`). Ensure it only accepts keyword arguments—`output_size` is always provided by `ModelOption`.
+1. Define the model class (e.g., under `model_trainer/options/options_model/`). Ensure it only accepts keyword arguments—`output_size` is always provided by `ModelOption`—and make the dense head adaptive (flatten at runtime + `nn.LazyLinear`) so it works with any feature shape.
 2. Create a builder function returning the instantiated model and register a `ModelOption` in `options_model/__init__.py`.
 3. For optimizers/criteria, add a new module under `options_training_method/` that constructs the optimizer and criterion with explicit keyword-only builders. Register it in the `TRAINING_METHOD_OPTIONS` list.
 4. Reference the new names from `TrainingExperiment` objects so `run_pipeline` can resolve them.
