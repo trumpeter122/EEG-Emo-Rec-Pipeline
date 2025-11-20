@@ -67,9 +67,16 @@ class FeatureChannelExtractionMethod(Protocol):
 
 
 class ModelBuilder(Protocol):
-    """Callable protocol for constructing neural network models."""
+    """
+    Callable protocol for constructing neural network models.
 
-    def __call__(self, *args: Any, **kwargs: Any) -> nn.Module: ...
+    - Builders receive ``output_size`` explicitly so option definitions do not
+      rely on mutating kwargs at call time.
+    - Any additional configuration should be captured via ``functools.partial``
+      when defining the builder.
+    """
+
+    def __call__(self, *, output_size: int) -> nn.Module: ...
 
 
 class OptimizerBuilder(Protocol):
@@ -88,6 +95,13 @@ class OptionList(Sequence[_OptionType]):
     """Ordered registry of option objects with lookup helpers."""
 
     def __init__(self, options: Iterable[_OptionType]):
+        """
+        Initialize the OptionList.
+
+        Args:
+        ----
+            options: An iterable of option objects.
+        """
         self._options = list(options)
 
     @overload
@@ -97,12 +111,37 @@ class OptionList(Sequence[_OptionType]):
     def __getitem__(self, index: slice) -> Sequence[_OptionType]: ...
 
     def __getitem__(self, index: int | slice) -> _OptionType | Sequence[_OptionType]:
+        """
+        Get an option by index or slice.
+
+        Args:
+        ----
+            index: An integer index or a slice.
+
+        Returns:
+        -------
+            The option at the given index or a sequence of options.
+        """
         return self._options[index]
 
     def __len__(self) -> int:
+        """
+        Get the number of options in the list.
+
+        Returns:
+        -------
+            The number of options.
+        """
         return len(self._options)
 
     def __iter__(self) -> Iterator[_OptionType]:
+        """
+        Get an iterator over the options.
+
+        Returns:
+        -------
+            An iterator over the options.
+        """
         return iter(self._options)
 
     def get_name(self, name: str) -> _OptionType:
@@ -121,5 +160,15 @@ class OptionList(Sequence[_OptionType]):
         raise KeyError(f'Name "{name}" does not exist.')
 
     def get_names(self, names: Sequence[str]) -> list[_OptionType]:
-        """Return options that match ``names`` in order."""
+        """
+        Return options that match ``names`` in order.
+
+        Args:
+        ----
+            names: A sequence of names to retrieve.
+
+        Returns:
+        -------
+            A list of options that match the given names.
+        """
         return [self.get_name(name=name) for name in names]

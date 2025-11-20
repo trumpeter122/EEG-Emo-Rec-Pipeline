@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from config.constants import DEAP_ROOT
 
@@ -46,14 +46,12 @@ class PreprocessingOption:
         path.mkdir(exist_ok=True)
         return path
 
-    def to_params(self) -> dict[str, dict[str, str]]:
+    def to_params(self) -> dict[str, Any]:
         """Serialize the option metadata into a JSON-friendly dictionary."""
         return {
-            "preprocessing option": {
-                "name": self.name,
-                "root_path": str(self.root_path),
-                "subject_path": str(self.get_subject_path()),
-                "trial_path": str(self.get_trial_path()),
-                "feature_path": str(self.get_feature_path()),
-            },
+            "name": self.name,
+            "root_path": str(self.root_path),
+            "subject_path": str(self.get_subject_path()),
+            "trial_path": str(self.get_trial_path()),
+            "feature_path": str(self.get_feature_path()),
         }

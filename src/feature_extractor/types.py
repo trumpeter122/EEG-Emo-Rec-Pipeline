@@ -143,18 +143,23 @@ class FeatureExtractionOption:
         return sorted(paths)
 
     def get_metadata_path(self) -> Path:
+        """Return the path to the metadata directory."""
         return self.get_path() / "metadata"
 
     def get_metadata_baseline_path(self) -> Path:
+        """Return the path to the baseline metadata directory."""
         return self.get_metadata_path() / "baseline"
 
     def get_metadata_params_path(self) -> Path:
+        """Return the path to the parameters JSON file."""
         return self.get_metadata_path() / "params.json"
 
     def get_metadata_metrics_path(self) -> Path:
+        """Return the path to the metrics JSON file."""
         return self.get_metadata_path() / "metrics.json"
 
     def get_metadata_shape_path(self) -> Path:
+        """Return the path to the shape CSV file."""
         return self.get_metadata_path() / "shape.csv"
 
     def to_params(self) -> dict[str, Any]:

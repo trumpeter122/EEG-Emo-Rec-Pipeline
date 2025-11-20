@@ -6,11 +6,11 @@ import json
 import time
 from collections import OrderedDict
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from datetime import datetime
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import torch
-import torch.nn.functional as F
 from sklearn.metrics import (  # type: ignore[import-untyped]
     accuracy_score,
     balanced_accuracy_score,
@@ -25,16 +25,12 @@ from sklearn.metrics import (  # type: ignore[import-untyped]
     r2_score,
     recall_score,
 )
-from torch import nn
 
 from utils import track
 from utils.fs import atomic_directory
 
 if TYPE_CHECKING:
     from pathlib import Path
-
-    from torch.optim import Optimizer
-    from torch.utils.data import DataLoader
 
     from model_trainer.types import ModelTrainingOption
 
@@ -65,189 +61,20 @@ class _EpochMetrics:
         }
 
 
-def _ensure_conv1d_shape(batch: torch.Tensor) -> torch.Tensor:
-    """
-    Normalize ``batch`` into ``(batch, channels, length)`` for 1D convolutions.
-    """
-    if batch.ndim == 2:
-        return batch.unsqueeze(1)
-    if batch.ndim == 3 and batch.shape[1] == 1:
-        return batch
-    return batch.reshape(batch.shape[0], 1, -1)
-
-
-def _prepare_batch(
-    features: torch.Tensor,
-    targets: torch.Tensor,
-    *,
-    device: torch.device,
-    target_kind: Literal["regression", "classification"],
-) -> tuple[torch.Tensor, torch.Tensor]:
-    """Move tensors to ``device`` and ensure consistent dtypes/shapes."""
-    feat = _ensure_conv1d_shape(features.to(device=device, dtype=torch.float32))
-    if target_kind == "classification":
-        targ = targets.to(device=device, dtype=torch.long)
-    else:
-        targ = targets.to(device=device, dtype=torch.float32)
-        if targ.ndim == 1:
-            targ = targ.unsqueeze(1)
-    return feat, targ
-
-
-def _classification_mae(
-    outputs: torch.Tensor,
-    labels: torch.Tensor,
-    class_values: torch.Tensor,
-) -> torch.Tensor:
-    """Return summed MAE between predicted and true class values."""
-    pred_indices = torch.argmax(outputs, dim=1)
-    pred_values = class_values[pred_indices]
-    true_values = class_values[labels]
-    return F.l1_loss(
-        pred_values.unsqueeze(1),
-        true_values.unsqueeze(1),
-        reduction="sum",
-    )
-
-
-def _train_epoch(
-    *,
-    model: nn.Module,
-    loader: DataLoader[Any],
-    optimizer: Optimizer,
-    criterion: nn.Module,
-    device: torch.device,
-    target_kind: Literal["regression", "classification"],
-    class_values: torch.Tensor | None,
-) -> tuple[float, float]:
-    """Run one training epoch and return average loss/MAE."""
-    model.train()
-    total_loss = 0.0
-    total_mae = 0.0
-    total_samples = 0
-
-    for features, targets in loader:
-        inputs, labels = _prepare_batch(
-            features=features,
-            targets=targets,
-            device=device,
-            target_kind=target_kind,
-        )
-        optimizer.zero_grad(set_to_none=True)
-        outputs = model(inputs)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
-
-        batch_size = labels.size(0)
-        total_loss += float(loss.item()) * batch_size
-        if target_kind == "classification":
-            if class_values is None:
-                raise RuntimeError(
-                    "class_values tensor is required for classification."
-                )
-            mae = _classification_mae(outputs, labels, class_values)
-        else:
-            mae = F.l1_loss(outputs, labels, reduction="sum")
-        total_mae += float(mae.item())
-        total_samples += batch_size
-
-    avg_loss = total_loss / max(1, total_samples)
-    avg_mae = total_mae / max(1, total_samples)
-    return avg_loss, avg_mae
-
-
-def _evaluate_epoch(
-    *,
-    model: nn.Module,
-    loader: DataLoader[Any],
-    criterion: nn.Module,
-    device: torch.device,
-    target_kind: Literal["regression", "classification"],
-    class_values: torch.Tensor | None,
-) -> tuple[float, float]:
-    """Evaluate ``model`` without gradient tracking."""
-    model.eval()
-    total_loss = 0.0
-    total_mae = 0.0
-    total_samples = 0
-
-    with torch.no_grad():
-        for features, targets in loader:
-            inputs, labels = _prepare_batch(
-                features=features,
-                targets=targets,
-                device=device,
-                target_kind=target_kind,
-            )
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
-
-            batch_size = labels.size(0)
-            total_loss += float(loss.item()) * batch_size
-            if target_kind == "classification":
-                if class_values is None:
-                    raise RuntimeError(
-                        "class_values tensor is required for classification.",
-                    )
-                mae = _classification_mae(outputs, labels, class_values)
-            else:
-                mae = F.l1_loss(outputs, labels, reduction="sum")
-            total_mae += float(mae.item())
-            total_samples += batch_size
-
-    avg_loss = total_loss / max(1, total_samples)
-    avg_mae = total_mae / max(1, total_samples)
-    return avg_loss, avg_mae
-
-
-def _collect_predictions(
-    *,
-    model: nn.Module,
-    loader: DataLoader[Any],
-    device: torch.device,
-    target_kind: Literal["regression", "classification"],
-    class_values: np.ndarray | None,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Return flattened predictions and targets for ``loader``."""
-    model.eval()
-    preds: list[np.ndarray] = []
-    trues: list[np.ndarray] = []
-
-    with torch.no_grad():
-        for features, targets in loader:
-            inputs, labels = _prepare_batch(
-                features=features,
-                targets=targets,
-                device=device,
-                target_kind=target_kind,
-            )
-            outputs = model(inputs)
-            if target_kind == "classification":
-                pred_indices = torch.argmax(outputs, dim=1, keepdim=True)
-                preds.append(pred_indices.detach().cpu().numpy())
-                trues.append(labels.detach().cpu().unsqueeze(1).cpu().numpy())
-            else:
-                preds.append(outputs.detach().cpu().numpy())
-                trues.append(labels.detach().cpu().numpy())
-
-    if not preds:
-        return np.array([], dtype=np.float32), np.array([], dtype=np.float32)
-
-    pred_array = np.concatenate(preds, axis=0).reshape(-1)
-    true_array = np.concatenate(trues, axis=0).reshape(-1)
-    if target_kind == "classification" and class_values is not None:
-        pred_array = class_values[pred_array.astype(int)]
-        true_array = class_values[true_array.astype(int)]
-    return pred_array, true_array
-
-
 def _regression_metrics(
     *,
     predictions: np.ndarray,
     targets: np.ndarray,
 ) -> dict[str, float]:
-    """Compute a suite of regression metrics."""
+    """
+    Compute a suite of regression metrics for the provided arrays.
+
+    - The returned mapping includes MAE/MSE-derived statistics plus r2 and
+      explained variance so experiment summaries capture both absolute and
+      relative performance.
+    - When no predictions are available an empty dict is returned to avoid
+      polluting the metrics JSON with NaNs.
+    """
     if predictions.size == 0:
         return {}
 
@@ -276,7 +103,15 @@ def _classification_metrics(
     predictions: np.ndarray,
     targets: np.ndarray,
 ) -> dict[str, Any]:
-    """Compute classification metrics by rounding scores to integer labels."""
+    """
+    Compute classification metrics by rounding scores to integer labels.
+
+    - Predictions / targets are first mapped to integer labels so they can feed
+      the scikit-learn metrics.
+    - Macro/micro/weighted flavors of precision, recall, and F1 are included to
+      diagnose class-imbalance behavior.
+    - The confusion matrix is serialized for downstream visualization.
+    """
     if predictions.size == 0:
         return {}
 
@@ -371,7 +206,12 @@ def _classification_metrics(
 
 
 def _dump_json(path: Path, payload: Any) -> None:
-    """Persist ``payload`` to ``path`` using UTF-8 JSON."""
+    """
+    Serialize ``payload`` as indented UTF-8 JSON at ``path``.
+
+    - The parent directory is created if necessary so callers can operate on
+      fresh staging areas during atomic writes.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open(mode="w", encoding="utf-8") as destination:
         json.dump(payload, destination, indent=2)
@@ -379,7 +219,16 @@ def _dump_json(path: Path, payload: Any) -> None:
 
 def run_model_trainer(model_training_option: ModelTrainingOption) -> None:
     """
-    Train ``model_training_option`` and persist metrics/artifacts atomically.
+    Train the supplied option end-to-end and persist metrics atomically.
+
+    - The routine seeds PyTorch for determinism, validates that the selected
+      model/criterion pair matches the dataset target kind, trains for the
+      requested number of epochs while tracking the best validation loss, and
+      finally re-loads the best checkpoint to compute regression + classification
+      diagnostics on both train and test splits.
+    - All metadata (params, metrics, splits, weights) is written via
+      ``atomic_directory`` to guarantee that partially written runs never
+      corrupt previous artifacts.
     """
     training_option = model_training_option.training_option
     data_option = training_option.training_data_option
@@ -390,7 +239,11 @@ def run_model_trainer(model_training_option: ModelTrainingOption) -> None:
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device_name = method_option.device
+    if device_name == "cuda" and not torch.cuda.is_available():
+        raise RuntimeError("CUDA requested but not available on this machine")
+    device = torch.device(device_name)
+
     target_kind = data_option.target_kind
     class_values_array = data_option.get_class_values()
     if target_kind == "classification":
@@ -424,22 +277,24 @@ def run_model_trainer(model_training_option: ModelTrainingOption) -> None:
         context="Model Trainer",
     ):
         start = time.perf_counter()
-        train_loss, train_mae = _train_epoch(
-            model=model,
-            loader=training_option.train_loader,
-            optimizer=optimizer,
-            criterion=criterion,
-            device=device,
-            target_kind=target_kind,
-            class_values=class_values_tensor,
+        train_loss, train_mae = method_option.train_epoch_fn(
+            model,
+            training_option.train_loader,
+            optimizer,
+            criterion,
+            device,
+            target_kind,
+            class_values_tensor,
+            method_option.batch_formatter,
         )
-        val_loss, val_mae = _evaluate_epoch(
-            model=model,
-            loader=training_option.test_loader,
-            criterion=criterion,
-            device=device,
-            target_kind=target_kind,
-            class_values=class_values_tensor,
+        val_loss, val_mae = method_option.evaluate_epoch_fn(
+            model,
+            training_option.test_loader,
+            criterion,
+            device,
+            target_kind,
+            class_values_tensor,
+            method_option.batch_formatter,
         )
         elapsed = time.perf_counter() - start
 
@@ -465,50 +320,60 @@ def run_model_trainer(model_training_option: ModelTrainingOption) -> None:
         raise RuntimeError("Model training did not produce any checkpoints.")
 
     model.load_state_dict(best_state)
-    train_preds, train_targets = _collect_predictions(
-        model=model,
-        loader=training_option.train_loader,
-        device=device,
-        target_kind=target_kind,
-        class_values=class_values_array,
+    train_preds, train_targets = method_option.prediction_collector(
+        model,
+        training_option.train_loader,
+        device,
+        target_kind,
+        class_values_array,
+        method_option.batch_formatter,
     )
-    test_preds, test_targets = _collect_predictions(
-        model=model,
-        loader=training_option.test_loader,
-        device=device,
-        target_kind=target_kind,
-        class_values=class_values_array,
+    test_preds, test_targets = method_option.prediction_collector(
+        model,
+        training_option.test_loader,
+        device,
+        target_kind,
+        class_values_array,
+        method_option.batch_formatter,
     )
 
     total_seconds = float(sum(metric.seconds for metric in history))
+    if target_kind == "regression":
+        train_metrics = {
+            "regression": _regression_metrics(
+                predictions=train_preds,
+                targets=train_targets,
+            ),
+        }
+        test_metrics = {
+            "regression": _regression_metrics(
+                predictions=test_preds,
+                targets=test_targets,
+            ),
+        }
+    else:
+        train_metrics = {
+            "classification": _classification_metrics(
+                predictions=train_preds,
+                targets=train_targets,
+            ),
+        }
+        test_metrics = {
+            "classification": _classification_metrics(
+                predictions=test_preds,
+                targets=test_targets,
+            ),
+        }
     metrics_payload = {
-        "device": str(device),
         "best_epoch": best_epoch,
         "best_val_loss": best_val_loss,
         "total_seconds": total_seconds,
         "epochs": [metric.to_dict() for metric in history],
-        "train_metrics": {
-            "regression": _regression_metrics(
-                predictions=train_preds,
-                targets=train_targets,
-            ),
-            "classification": _classification_metrics(
-                predictions=train_preds,
-                targets=train_targets,
-            ),
-        },
-        "test_metrics": {
-            "regression": _regression_metrics(
-                predictions=test_preds,
-                targets=test_targets,
-            ),
-            "classification": _classification_metrics(
-                predictions=test_preds,
-                targets=test_targets,
-            ),
-        },
+        "train_metrics": train_metrics,
+        "test_metrics": test_metrics,
     }
     params_payload = {
+        "time stamp": str(datetime.now()),
         "model_training_option": model_training_option.to_params(),
     }
     splits_payload = training_option.training_data_option.segment_splits

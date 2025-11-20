@@ -1,4 +1,4 @@
-"""Training and model option definitions for model_trainer."""
+"""Options describing how extracted features become datasets."""
 
 from __future__ import annotations
 
@@ -13,65 +13,31 @@ from sklearn.preprocessing import (  # type: ignore[import-untyped]
     MinMaxScaler,
     StandardScaler,
 )
-from torch.utils.data import DataLoader, Dataset
 
-from config.constants import RESULTS_ROOT
-from config.option_utils import (
-    CriterionBuilder,
-    ModelBuilder,
-    OptimizerBuilder,
-    _callable_path,
-)
+from .dataset import SegmentDataset
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
-    from pathlib import Path
+
+    from torch.utils.data import Dataset
 
     from feature_extractor.types import FeatureExtractionOption
 
-__all__ = [
-    "ModelOption",
-    "ModelTrainingOption",
-    "TrainingDataOption",
-    "TrainingMethodOption",
-    "TrainingOption",
-]
-
-if TYPE_CHECKING:
-    from torch import nn
-    from torch.optim import Optimizer
-
-
-class _SegmentDataset(Dataset[tuple[np.ndarray, float]]):
-    """Minimal torch ``Dataset`` wrapper for segment features and targets."""
-
-    def __init__(
-        self,
-        *,
-        features: Sequence[np.ndarray],
-        targets: Sequence[float],
-        target_dtype: np.dtype[Any],
-    ):
-        if len(features) != len(targets):
-            raise ValueError(
-                "features and targets must contain the same number of rows.",
-            )
-
-        self._features = [
-            np.asarray(feature, dtype=np.float32).reshape(-1) for feature in features
-        ]
-        self._targets = np.asarray(list(targets), dtype=target_dtype)
-
-    def __len__(self) -> int:
-        return len(self._targets)
-
-    def __getitem__(self, index: int) -> tuple[np.ndarray, float]:
-        return self._features[index], self._targets[index]
+__all__ = ["TrainingDataOption"]
 
 
 @dataclass(slots=True)
 class TrainingDataOption:
-    """Configuration describing how extracted features are transformed into datasets."""
+    """
+    Recipe for transforming extracted feature frames into train/test datasets.
+
+    - This option is responsible for loading the joblib frames, selecting the
+      requested target column, encoding classification labels, scaling the
+      feature tensors, and generating reproducible train/test segment splits.
+    - The resulting torch ``Dataset`` objects are attached for downstream
+      dataloader construction, and metadata helpers expose the exact label set
+      so metrics can be mapped back to user-friendly values.
+    """
 
     feature_extraction_option: FeatureExtractionOption
     target: str
@@ -81,6 +47,7 @@ class TrainingDataOption:
     target_kind: Literal["regression", "classification"]
     feature_scaler: Literal["none", "standard", "minmax"]
     class_labels_expected: Sequence[float] | None = None
+
     name: str = field(init=False)
     train_dataset: Dataset[tuple[np.ndarray, float]] = field(init=False)
     test_dataset: Dataset[tuple[np.ndarray, float]] = field(init=False)
@@ -260,7 +227,7 @@ class TrainingDataOption:
         subset = frame.iloc[indices].reset_index(drop=True)
         features = subset["data"].tolist()
         targets = subset[self.target].tolist()
-        return _SegmentDataset(
+        return SegmentDataset(
             features=features,
             targets=targets,
             target_dtype=self._target_dtype,
@@ -289,184 +256,3 @@ class TrainingDataOption:
         if not self.class_labels:
             return None
         return np.asarray(self.class_labels, dtype=np.float32)
-
-
-@dataclass(slots=True)
-class TrainingMethodOption:
-    """Optimization hyperparameters controlling how datasets are consumed."""
-
-    name: str
-    epochs: int
-    batch_size: int
-    optimizer_builder: OptimizerBuilder
-    criterion_builder: CriterionBuilder
-    num_workers: int
-    pin_memory: bool
-    drop_last: bool
-    target_kind: Literal["regression", "classification"]
-
-    def __post_init__(self) -> None:
-        if self.epochs <= 0:
-            raise ValueError("epochs must be a positive integer.")
-        if self.batch_size <= 0:
-            raise ValueError("batch_size must be a positive integer.")
-        if self.num_workers < 0:
-            raise ValueError("num_workers cannot be negative.")
-
-    def build_optimizer(self, *, model: nn.Module) -> Optimizer:
-        """Instantiate the optimizer for ``model``."""
-        return self.optimizer_builder(model=model)
-
-    def build_criterion(self) -> nn.Module:
-        """Instantiate the configured loss function."""
-        return self.criterion_builder()
-
-    def build_dataloader(
-        self,
-        *,
-        dataset: Dataset[tuple[np.ndarray, float]],
-        shuffle: bool,
-    ) -> DataLoader[tuple[np.ndarray, float]]:
-        """Create a ``DataLoader`` suitable for the configured training regime."""
-        return DataLoader(
-            dataset=dataset,
-            batch_size=self.batch_size,
-            shuffle=shuffle,
-            num_workers=self.num_workers,
-            pin_memory=self.pin_memory,
-            drop_last=self.drop_last,
-        )
-
-    def to_params(self) -> dict[str, Any]:
-        """Serialize method hyperparameters."""
-        return {
-            "name": self.name,
-            "epochs": self.epochs,
-            "batch_size": self.batch_size,
-            "optimizer_builder": _callable_path(self.optimizer_builder),
-            "criterion_builder": _callable_path(self.criterion_builder),
-            "num_workers": self.num_workers,
-            "pin_memory": self.pin_memory,
-            "drop_last": self.drop_last,
-            "target_kind": self.target_kind,
-        }
-
-
-@dataclass(slots=True)
-class TrainingOption:
-    """Consolidated configuration describing datasets + optimization strategy."""
-
-    training_data_option: TrainingDataOption
-    training_method_option: TrainingMethodOption
-    name: str = field(init=False)
-    train_loader: DataLoader[tuple[np.ndarray, float]] = field(init=False)
-    test_loader: DataLoader[tuple[np.ndarray, float]] = field(init=False)
-
-    def __post_init__(self) -> None:
-        if (
-            self.training_method_option.target_kind
-            != self.training_data_option.target_kind
-        ):
-            raise ValueError(
-                "training_method_option target_kind must match training_data_option.",
-            )
-        self.name = (
-            f"{self.training_data_option.name}"
-            f"|method={self.training_method_option.name}"
-        )
-        self.train_loader = self.training_method_option.build_dataloader(
-            dataset=self.training_data_option.train_dataset,
-            shuffle=True,
-        )
-        self.test_loader = self.training_method_option.build_dataloader(
-            dataset=self.training_data_option.test_dataset,
-            shuffle=False,
-        )
-
-    def to_params(self) -> dict[str, Any]:
-        """Serialize the combined training configuration."""
-        return {
-            "name": self.name,
-            "training_data_option": self.training_data_option.to_params(),
-            "training_method_option": self.training_method_option.to_params(),
-        }
-
-
-@dataclass(slots=True)
-class ModelOption:
-    """Abstraction describing how to construct a specific neural network model."""
-
-    name: str
-    model_builder: ModelBuilder
-    output_size: int
-    target_kind: Literal["regression", "classification"]
-    model_args: tuple[Any, ...] = field(default_factory=tuple)
-    model_kwargs: dict[str, Any] = field(default_factory=dict)
-
-    def build_model(self) -> nn.Module:
-        """Instantiate the configured model."""
-        kwargs = dict(self.model_kwargs)
-        kwargs.setdefault("output_size", self.output_size)
-        return self.model_builder(*self.model_args, **kwargs)
-
-    def to_params(self) -> dict[str, Any]:
-        """Serialize the model descriptor."""
-        return {
-            "name": self.name,
-            "model_builder": _callable_path(self.model_builder),
-            "output_size": self.output_size,
-            "target_kind": self.target_kind,
-            "model_args": list(self.model_args),
-            "model_kwargs": dict(self.model_kwargs),
-        }
-
-
-@dataclass(slots=True)
-class ModelTrainingOption:
-    """Aggregated configuration used for end-to-end training experiments."""
-
-    model_option: ModelOption
-    training_option: TrainingOption
-
-    def __post_init__(self) -> None:
-        data_option = self.training_option.training_data_option
-        if self.model_option.target_kind != data_option.target_kind:
-            raise ValueError(
-                "model_option target_kind must match training_data_option target_kind.",
-            )
-
-    def get_path(self) -> Path:
-        """Directory where model artifacts (weights + metrics) are written."""
-        feature_option = (
-            self.training_option.training_data_option.feature_extraction_option
-        )
-        feature_path = RESULTS_ROOT / feature_option.name
-        return (
-            feature_path
-            / "models"
-            / self.model_option.name
-            / self.training_option.training_method_option.name
-        )
-
-    def get_params_path(self) -> Path:
-        """Return the file used to persist ``to_params`` metadata."""
-        return self.get_path() / "params.json"
-
-    def get_metrics_path(self) -> Path:
-        """Return the metrics JSON path."""
-        return self.get_path() / "metrics.json"
-
-    def get_state_dict_path(self) -> Path:
-        """Return the path for the serialized model weights."""
-        return self.get_path() / "best_model.pt"
-
-    def get_splits_path(self) -> Path:
-        """Return the path for persisting train/test segment identifiers."""
-        return self.get_path() / "splits.json"
-
-    def to_params(self) -> dict[str, Any]:
-        """Serialize the aggregated model + training configuration."""
-        return {
-            "model_option": self.model_option.to_params(),
-            "training_option": self.training_option.to_params(),
-        }
