@@ -45,9 +45,9 @@ def _extract_feature(
     """
     Segment a trial into overlapping windows and compute features for each slice.
 
-    The baseline window always corresponds to the most recent segment that fits
-    within the annotated baseline period. All subsequent segments start after
-    the baseline.
+    - The baseline window always corresponds to the most recent segment that fits
+      within the annotated baseline period.
+    - All subsequent segments start after the baseline.
     """
     trial = trial_df.iloc[0]
     fe_method = feature_extraction_option.extraction_method

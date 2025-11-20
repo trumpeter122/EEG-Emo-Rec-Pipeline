@@ -89,8 +89,12 @@ def _prepare_channels(
     """
     Split ``raw`` into EEG and stimulation channels.
 
-    Returns the EEG channel names, the stim channel name, and copies of the raw
-    objects filtered to each subset.
+    Returns
+    -------
+    - eeg_channels: The EEG channel names.
+    - stim_ch_name: The stim channel name.
+    - raw_stim: A copy of the raw object filtered to the stimulation channel subset.
+    - raw_eeg: A copy of the raw object filtered to the EEG channel subset.
     """
     ch_names = raw.ch_names
     eeg_channels = ch_names[:EEG_ELECTRODES_NUM]
