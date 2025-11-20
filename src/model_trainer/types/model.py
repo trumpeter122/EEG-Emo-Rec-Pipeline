@@ -21,6 +21,9 @@ class ModelOption:
     - Options store a human-readable name, the callable ``model_builder`` that
       produces initialized ``nn.Module`` instances, the required ``output_size``,
       and the supported ``target_kind``.
+    - Model builders must support arbitrary segment lengths (e.g., use
+      ``nn.Flatten`` + ``nn.LazyLinear`` instead of hardcoded dimensions) so
+      feature-extraction choices do not force architecture rewrites.
     - Serialization helpers expose this data so metrics/artifacts can be traced
       back to the exact model configuration.
     """

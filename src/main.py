@@ -40,8 +40,19 @@ def main() -> None:
 
     run_pipeline(
         preprocessing_options=PREPROCESSING_OPTIONS.get_names(names=["clean"]),
-        feature_options=list(FEATURE_OPTIONS.get_names(["psd", "de", "deasm", "deasm"])),
-        channel_pick_options=list(CHANNEL_PICK_OPTIONS.get_names(["minimal_frontal_parietal", "balanced_classic_6", "optimized_gold_standard_8", "standard_32"])),
+        feature_options=list(
+            FEATURE_OPTIONS.get_names(names=["psd", "de", "deasm", "deasm"]),
+        ),
+        channel_pick_options=list(
+            CHANNEL_PICK_OPTIONS.get_names(
+                names=[
+                    "minimal_frontal_parietal",
+                    "balanced_classic_6",
+                    "optimized_gold_standard_8",
+                    "standard_32",
+                ],
+            ),
+        ),
         segmentation_options=list(SEGMENTATION_OPTIONS),
         experiments=experiments,
         model_options=MODEL_OPTIONS,

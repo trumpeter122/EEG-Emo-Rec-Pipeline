@@ -13,31 +13,42 @@ class CNN1D_N1(nn.Module):
     """
     Three-block convolutional encoder feeding a shallow fully-connected head.
 
-    The architecture expects inputs shaped ``(batch, channels=1, length)`` and
-    assumes each example flattens to a 1280-length vector after max pooling.
+    The dense layers rely on ``nn.LazyLinear`` so the model adapts to any
+    flattened length produced by the convolutional stack.  When adding new
+    architectures, ensure they follow this adaptive pattern rather than
+    hardcoding a fixed number of timesteps or channels.
     """
 
     def __init__(self, *, output_size: int):
         super().__init__()
         self.conv1 = nn.Conv1d(
-            in_channels=1, out_channels=128, kernel_size=3, padding=1
+            in_channels=1,
+            out_channels=128,
+            kernel_size=3,
+            padding=1,
         )
         self.bn1 = nn.BatchNorm1d(num_features=128)
         self.pool1 = nn.MaxPool1d(kernel_size=2)
 
         self.conv2 = nn.Conv1d(
-            in_channels=128, out_channels=128, kernel_size=3, padding=1
+            in_channels=128,
+            out_channels=128,
+            kernel_size=3,
+            padding=1,
         )
         self.bn2 = nn.BatchNorm1d(num_features=128)
         self.pool2 = nn.MaxPool1d(kernel_size=2)
 
         self.conv3 = nn.Conv1d(
-            in_channels=128, out_channels=64, kernel_size=3, padding=1
+            in_channels=128,
+            out_channels=64,
+            kernel_size=3,
+            padding=1,
         )
         self.pool3 = nn.MaxPool1d(kernel_size=2)
 
-        # After three pooling operations the temporal dimension shrinks by 8.
-        self.fc1 = nn.Linear(in_features=64 * 20, out_features=64)
+        self.flatten = nn.Flatten(start_dim=1)
+        self.fc1 = nn.LazyLinear(out_features=64)
         self.dropout1 = nn.Dropout(p=0.2)
 
         self.fc2 = nn.Linear(in_features=64, out_features=32)
@@ -54,7 +65,7 @@ class CNN1D_N1(nn.Module):
         encoded = self.pool2(self.bn2(F.relu(self.conv2(encoded))))
         encoded = self.pool3(F.relu(self.conv3(encoded)))
 
-        flat = torch.flatten(encoded, start_dim=1)
+        flat = self.flatten(encoded)
 
         hidden = torch.tanh(self.fc1(flat))
         hidden = self.dropout1(hidden)
