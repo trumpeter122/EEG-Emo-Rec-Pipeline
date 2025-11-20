@@ -2,10 +2,11 @@
 """
 tree_data_shapes_rich.py
 
-Rich-based tree listing with data-aware summaries.
+Rich-based tree listing with data-aware summaries and du-like directory sizes.
 
 Features
 --------
+- Directory sizes (like `du -sh`), shown as human-readable (e.g. 1.2G) next to dirs.
 - Summarize many .npy files with the same array shape in a directory:
     tag: [Σ NPY]
 - Summarize many joblib files that are DataFrames with same shape+columns:
@@ -50,6 +51,7 @@ from rich.tree import Tree
 _NPY_CACHE: Dict[str, Optional[Tuple[int, ...]]] = {}
 _CSV_CACHE: Dict[str, Optional[Tuple[Tuple[int, int], Tuple[str, ...]]]] = {}
 _JOBLIB_DF_CACHE: Dict[str, Optional[Tuple[Tuple[int, int], Tuple[str, ...]]]] = {}
+_DIR_SIZE_CACHE: Dict[Tuple[str, bool], int] = {}
 
 
 # =============================================================================
@@ -58,6 +60,7 @@ _JOBLIB_DF_CACHE: Dict[str, Optional[Tuple[Tuple[int, int], Tuple[str, ...]]]] =
 def try_import_numpy():
     try:
         import numpy as np  # type: ignore
+
         return np
     except Exception:
         return None
@@ -66,6 +69,7 @@ def try_import_numpy():
 def try_import_pandas():
     try:
         import pandas as pd  # type: ignore
+
         return pd
     except Exception:
         return None
@@ -74,6 +78,7 @@ def try_import_pandas():
 def try_import_joblib():
     try:
         import joblib  # type: ignore
+
         return joblib
     except Exception:
         return None
@@ -119,6 +124,63 @@ def scan_sorted(path: str, follow_symlinks: bool) -> List[os.DirEntry]:
         return (dfirst, e.name.lower())
 
     return sorted(entries, key=sort_key)
+
+
+# =============================================================================
+# Size helpers (du-like)
+# =============================================================================
+def _dir_size_internal(path: str, follow_symlinks: bool, visited: set) -> int:
+    """Recursive directory size calculation with cycle protection."""
+    try:
+        st = os.stat(path, follow_symlinks=follow_symlinks)
+    except OSError:
+        return 0
+
+    if not stat.S_ISDIR(st.st_mode):
+        return st.st_size
+
+    key = (st.st_dev, st.st_ino)
+    if key in visited:
+        return 0
+    visited.add(key)
+
+    total = 0
+    try:
+        with os.scandir(path) as it:
+            for e in it:
+                try:
+                    est = e.stat(follow_symlinks=follow_symlinks)
+                except OSError:
+                    continue
+                if stat.S_ISDIR(est.st_mode):
+                    total += _dir_size_internal(e.path, follow_symlinks, visited)
+                else:
+                    total += est.st_size
+    except PermissionError:
+        pass
+    return total
+
+
+def get_dir_size(path: str, follow_symlinks: bool) -> int:
+    """Return size in bytes for directory (cached)."""
+    key = (os.path.abspath(path), follow_symlinks)
+    if key in _DIR_SIZE_CACHE:
+        return _DIR_SIZE_CACHE[key]
+    size = _dir_size_internal(path, follow_symlinks, set())
+    _DIR_SIZE_CACHE[key] = size
+    return size
+
+
+def format_size(num: int) -> str:
+    """Human-readable size like du -sh (approx)."""
+    units = ["B", "K", "M", "G", "T", "P"]
+    size = float(num)
+    for unit in units:
+        if size < 1024.0 or unit == units[-1]:
+            if unit == "B":
+                return f"{int(size)}B"
+            return f"{size:.1f}{unit}"
+        size /= 1024.0
 
 
 # =============================================================================
@@ -476,7 +538,9 @@ def build_joblib_dir_groups(
 def render_tree(
     console: Console, root: str, max_depth: Optional[int], follow_symlinks: bool
 ) -> None:
-    root_label = Text(root.rstrip(os.sep) + " ", style="bold white")
+    root_size = get_dir_size(root, follow_symlinks)
+    root_label = Text(root.rstrip(os.sep), style="bold white")
+    root_label.append(f" [{format_size(root_size)}] ", style="dim")
     root_label.append("(root)", style="dim")
     tree = Tree(root_label)
 
@@ -508,7 +572,7 @@ def render_tree(
             df_g = df_dir_to_group.get(d.path)
             npy_g = npy_dir_to_group.get(d.path)
 
-            # Prefer DF grouping if somehow both would match (should not happen in practice)
+            # Prefer DF grouping if both would match (rare)
             if df_g is not None:
                 if df_g["id"] in df_group_ids_seen:
                     continue
@@ -520,6 +584,8 @@ def render_tree(
                 shape = df_g["shape"]
                 count_per_dir = df_g["count_per_dir"]
                 base_cols = df_g["base_cols"]
+                sizes_bytes = [get_dir_size(de.path, follow_symlinks) for de in df_g["dirs"]]
+                total_size = sum(sizes_bytes)
                 head.append(
                     f" {len(df_g['dirs'])} dirs; {count_per_dir} joblib DFs each; ",
                     style="yellow",
@@ -527,6 +593,10 @@ def render_tree(
                 head.append(f"frame {shape_to_str(shape)}; ", style="yellow")
                 head.append("base columns: ", style="yellow")
                 head.append(columns_to_str(base_cols), style="yellow")
+                head.append(
+                    f"; total size ≈ {format_size(total_size)}",
+                    style="yellow",
+                )
                 group_node = node.add(head)
                 total_dirs += len(df_g["dirs"])
 
@@ -539,13 +609,22 @@ def render_tree(
                     if len(labels) > 1:
                         varying_positions.add(pos)
 
-                max_name_len = max(len(dentry.name) for dentry in df_g["dirs"])
+                names = [de.name for de in df_g["dirs"]]
+                sizes_str = [format_size(sz) for sz in sizes_bytes]
+                max_name_len = max(len(n) for n in names)
+                max_size_len = max(len(s) for s in sizes_str)
 
-                for (shape_j, cols_j), dentry in zip(metas, df_g["dirs"]):
-                    name_str = dentry.name + "/"
-                    padding = " " * (max_name_len + 1 - len(dentry.name))
-                    label = Text(name_str, style="bold cyan")
-                    label.append(padding)
+                for (shape_j, cols_j), dentry, size_str in zip(
+                    metas, df_g["dirs"], sizes_str
+                ):
+                    name = dentry.name
+                    label = Text(name + "/", style="bold cyan")
+                    # align names
+                    label.append(" " * (max_name_len - len(name) + 1))
+                    # size column
+                    label.append(f"[{size_str}]", style="dim")
+                    label.append(" " * (max_size_len - len(size_str) + 2))
+
                     diffs = [cols_j[pos] for pos in varying_positions]
                     if diffs:
                         label.append("varies: ", style="dim")
@@ -564,27 +643,40 @@ def render_tree(
                 head = Text()
                 head.append_text(tag)
                 count_per_dir, shape = npy_g["meta"]
+                sizes_bytes = [get_dir_size(de.path, follow_symlinks) for de in npy_g["dirs"]]
+                total_size = sum(sizes_bytes)
                 head.append(
                     f" {len(npy_g['dirs'])} dirs; {count_per_dir} *.npy each; ",
                     style="cyan",
                 )
-                head.append(f"array shape {shape_to_str(shape)}", style="cyan")
+                head.append(f"array shape {shape_to_str(shape)}; ", style="cyan")
+                head.append(
+                    f"total size ≈ {format_size(total_size)}",
+                    style="cyan",
+                )
                 group_node = node.add(head)
                 total_dirs += len(npy_g["dirs"])
 
-                max_name_len = max(len(dentry.name) for dentry in npy_g["dirs"])
-                for dentry in npy_g["dirs"]:
-                    name_str = dentry.name + "/"
-                    padding = " " * (max_name_len + 1 - len(dentry.name))
-                    label = Text(name_str, style="bold cyan")
-                    label.append(padding)
+                names = [de.name for de in npy_g["dirs"]]
+                sizes_str = [format_size(sz) for sz in sizes_bytes]
+                max_name_len = max(len(n) for n in names)
+                max_size_len = max(len(s) for s in sizes_str)
+
+                for dentry, size_str in zip(npy_g["dirs"], sizes_str):
+                    name = dentry.name
+                    label = Text(name + "/", style="bold cyan")
+                    label.append(" " * (max_name_len - len(name) + 1))
+                    label.append(f"[{size_str}]", style="dim")
+                    label.append(" " * (max_size_len - len(size_str) + 2))
                     label.append("(same as group)", style="dim")
                     group_node.add(label)
                 continue
 
             # Normal directory
             total_dirs += 1
+            size_bytes = get_dir_size(d.path, follow_symlinks)
             d_label = Text(d.name + "/", style="bold cyan")
+            d_label.append(f" [{format_size(size_bytes)}]", style="dim")
             child_node = node.add(d_label)
             if max_depth is None or depth < max_depth:
                 _walk(d.path, depth + 1, child_node)
@@ -674,7 +766,8 @@ def render_tree(
                 "  [yellow][G DF][/yellow] group of similar DataFrame directories; child dirs "
                 "show only differing columns as 'varies: ...'\n"
                 "  [cyan][G NPY][/cyan] group of similar .npy-only directories (same count/shape)\n"
-                "  Column names like 'data[4x5]' mean that column stores numpy arrays of shape 4x5."
+                "  Column names like 'data[4x5]' mean that column stores numpy arrays of shape 4x5.\n"
+                "  Directory sizes in brackets (e.g. [1.2G]) are approximate total sizes like `du -sh`."
             ),
             title="Data-aware tree",
             border_style="magenta",
@@ -690,7 +783,7 @@ def main():
     ap = argparse.ArgumentParser(
         description=(
             "Rich tree-like listing with .npy/.csv/.joblib awareness, ndarray column shapes, "
-            "and collapsed joblib-DF/.npy directories"
+            "collapsed joblib-DF/.npy directories, and du-like directory sizes"
         )
     )
     ap.add_argument("path", help="root path")
