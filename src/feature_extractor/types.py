@@ -83,7 +83,7 @@ class SegmentationOption:
         if self.time_window > BASELINE_SEC:
             raise ValueError("time_window cannot exceed the baseline duration.")
 
-        self.name = f"{self.time_window:.2f}s_{self.time_step:.2f}s"
+        self.name = f"w{self.time_window:.2f}_s{self.time_step:.2f}"
 
     def to_params(self) -> dict[str, Any]:
         """Serialize the segmentation configuration."""
