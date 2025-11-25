@@ -27,6 +27,8 @@ class ModelTrainingOption:
     - Construction time validation ensures the model’s ``target_kind`` matches
       the dataset so incompatibilities are caught long before GPU cycles are
       spent.
+    - Run artifacts are rooted at ``results/{timestamp}/``; helpers accept the
+      run timestamp to construct file paths without relying on option names.
     """
 
     model_option: ModelOption
@@ -45,28 +47,24 @@ class ModelTrainingOption:
         ):
             raise ValueError("output_size must be set for torch backends.")
 
-    def get_path(self) -> Path:
+    def get_run_dir(self, *, run_timestamp: str) -> Path:
         """Directory where model artifacts (weights + metrics) are written."""
-        feature_option = (
-            self.training_option.training_data_option.feature_extraction_option
-        )
-        feature_path = RESULTS_ROOT / feature_option.name
-        return (
-            feature_path
-            / "models"
-            / self.model_option.name
-            / self.training_option.training_method_option.name
-        )
+        target_root = RESULTS_ROOT / self.model_option.target_kind
+        return target_root / run_timestamp
 
-    def get_params_path(self) -> Path:
+    def get_params_path(self, *, run_timestamp: str) -> Path:
         """Return the file used to persist ``to_params`` metadata."""
-        return self.get_path() / "params.json"
+        return self.get_run_dir(run_timestamp=run_timestamp) / "params.json"
 
-    def get_metrics_path(self) -> Path:
+    def get_params_hash_path(self, *, run_timestamp: str) -> Path:
+        """Return the file used to persist the params hash."""
+        return self.get_run_dir(run_timestamp=run_timestamp) / "params.sha256"
+
+    def get_metrics_path(self, *, run_timestamp: str) -> Path:
         """Return the metrics JSON path."""
-        return self.get_path() / "metrics.json"
+        return self.get_run_dir(run_timestamp=run_timestamp) / "metrics.json"
 
-    def get_model_artifact_path(self) -> Path:
+    def get_model_artifact_path(self, *, run_timestamp: str) -> Path:
         """
         Return the path for the serialized model/estimator weights.
 
@@ -76,11 +74,11 @@ class ModelTrainingOption:
         filename = "best_model.pt"
         if self.model_option.backend == "sklearn":
             filename = "best_model.joblib"
-        return self.get_path() / filename
+        return self.get_run_dir(run_timestamp=run_timestamp) / filename
 
-    def get_splits_path(self) -> Path:
+    def get_splits_path(self, *, run_timestamp: str) -> Path:
         """Return the path for persisting train/test segment identifiers."""
-        return self.get_path() / "splits.json"
+        return self.get_run_dir(run_timestamp=run_timestamp) / "splits.json"
 
     def to_params(self) -> dict[str, Any]:
         """Serialize the aggregated model + training configuration."""

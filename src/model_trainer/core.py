@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import time
 from collections import OrderedDict
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
 import joblib  # type: ignore[import-untyped]
@@ -27,8 +29,9 @@ from sklearn.metrics import (  # type: ignore[import-untyped]
     recall_score,
 )
 
-from utils import message, prompt_confirm, spinner, track
-from utils.fs import atomic_directory, directory_is_populated
+from config.constants import RESULTS_ROOT
+from utils import message, spinner, track
+from utils.fs import atomic_directory
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -37,6 +40,39 @@ if TYPE_CHECKING:
 
 __all__ = ["run_model_trainer"]
 ZERO_DIVISION: Any = 0
+
+
+def _hash_params(params: dict[str, Any]) -> str:
+    """Return a deterministic SHA256 hash for the params payload."""
+    serialized = json.dumps(
+        params,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+
+
+def _load_existing_param_hashes(results_root: Path) -> dict[str, list[Path]]:
+    """Return mapping of param hashes to existing run directories."""
+    hashes: dict[str, list[Path]] = {}
+    if not results_root.exists():
+        return hashes
+
+    for run_dir in results_root.iterdir():
+        if not run_dir.is_dir():
+            continue
+        hash_path = run_dir / "params.sha256"
+        if not hash_path.exists():
+            continue
+        try:
+            hash_value = hash_path.read_text(encoding="utf-8").strip()
+        except OSError:
+            continue
+        if not hash_value:
+            continue
+        hashes.setdefault(hash_value, []).append(run_dir)
+    return hashes
 
 
 class _EstimatorProtocol(Protocol):
@@ -244,18 +280,21 @@ def run_model_trainer(model_training_option: ModelTrainingOption) -> None:
     data_option = training_option.training_data_option
     method_option = training_option.training_method_option
     backend = method_option.backend
-
-    target_dir = model_training_option.get_path()
-    if directory_is_populated(target_dir):
-        description = (
-            f'Results already exist at "{target_dir}". Overwrite with the new run?'
+    params_payload = model_training_option.to_params()
+    params_hash = _hash_params(params=params_payload)
+    existing_hashes = _load_existing_param_hashes(results_root=RESULTS_ROOT)
+    if params_hash in existing_hashes:
+        run_dirs = ", ".join(str(path) for path in existing_hashes[params_hash])
+        message(
+            description=(
+                f"Identical params hash already exists at {run_dirs}. Skipping run."
+            ),
+            context="Model Trainer",
         )
-        if not prompt_confirm(description, timeout_seconds=3, default=False):
-            skip_description = (
-                f"Skipping training for {model_training_option.model_option.name}"
-            )
-            message(description=skip_description, context="Model Trainer")
-            return
+        return
+
+    run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+    target_dir = model_training_option.get_run_dir(run_timestamp=run_timestamp)
 
     target_kind = data_option.target_kind
     class_values_array = data_option.get_class_values()
@@ -486,28 +525,42 @@ def run_model_trainer(model_training_option: ModelTrainingOption) -> None:
         }
         model_artifact = model
 
-    params_payload = {
-        "time stamp": str(datetime.now()),
-        "model_training_option": model_training_option.to_params(),
-    }
     splits_payload = training_option.training_data_option.segment_splits
+    params_filename = model_training_option.get_params_path(
+        run_timestamp=run_timestamp,
+    ).name
+    params_hash_filename = model_training_option.get_params_hash_path(
+        run_timestamp=run_timestamp,
+    ).name
+    metrics_filename = model_training_option.get_metrics_path(
+        run_timestamp=run_timestamp,
+    ).name
+    splits_filename = model_training_option.get_splits_path(
+        run_timestamp=run_timestamp,
+    ).name
+    artifact_filename = model_training_option.get_model_artifact_path(
+        run_timestamp=run_timestamp,
+    ).name
+
+    metrics_payload["run_timestamp"] = run_timestamp
+    metrics_payload["params_hash"] = params_hash
 
     with atomic_directory(target_dir=target_dir) as staging_dir:
         _dump_json(
-            staging_dir / model_training_option.get_params_path().name,
+            staging_dir / params_filename,
             params_payload,
         )
+        params_hash_path = staging_dir / params_hash_filename
+        params_hash_path.write_text(data=params_hash, encoding="utf-8")
         _dump_json(
-            staging_dir / model_training_option.get_metrics_path().name,
+            staging_dir / metrics_filename,
             metrics_payload,
         )
         _dump_json(
-            staging_dir / model_training_option.get_splits_path().name,
+            staging_dir / splits_filename,
             splits_payload,
         )
-        artifact_path = (
-            staging_dir / model_training_option.get_model_artifact_path().name
-        )
+        artifact_path = staging_dir / artifact_filename
         if backend == "torch":
             torch.save(obj=model_artifact, f=artifact_path)
         else:
