@@ -1,12 +1,8 @@
-## Designs
-
-- Modular
-
-- Atomic writing to file system
+# EEG-Emo-Rec
 
 ## Guidelines
 
-- Consistency: 
+- Consistency:
 
   - Naming, commenting, and general coding styles should be consistent across the project
 
@@ -35,4 +31,3 @@
 - Typing: Implement full-typing
 
 - Verbosity: No printing by default
-
