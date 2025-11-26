@@ -415,7 +415,7 @@ def _run_torch_epochs(
 
     for epoch in track(
         iterable=range(1, total_epochs + 1),
-        description=f"Training {{{model_name}}}",
+        description="Training",
         context="Model Trainer",
     ):
         start = time.perf_counter()

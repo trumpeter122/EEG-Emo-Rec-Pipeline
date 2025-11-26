@@ -76,7 +76,7 @@ def main() -> None:
                 ],
             ),
         ),
-        segmentation_options=list(SEGMENTATION_OPTIONS.get_names(["2.00s_0.25s"])),
+        segmentation_options=list(SEGMENTATION_OPTIONS.get_names(["w2.00_s0.25"])),
         experiments=experiments,
         model_options=MODEL_OPTIONS,
         training_method_options=TRAINING_METHOD_OPTIONS,

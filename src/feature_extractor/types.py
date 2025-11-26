@@ -130,7 +130,6 @@ class FeatureExtractionOption:
     def get_path(self) -> Path:
         """Return the directory storing extracted segment features."""
         path = self.preprocessing_option.get_feature_path() / self.name
-        path.mkdir(exist_ok=True)
         return path
 
     def get_file_paths(self) -> list[Path]:
