@@ -132,6 +132,11 @@ def run_feature_extractor(
 
     trials_path = preprocessing_option.get_trial_path()
     trial_files = sorted(trials_path.glob("*.joblib"))
+    if not trial_files:
+        raise FileNotFoundError(
+            f'No trial data found at "{trials_path}" for preprocessing option '
+            f"{{{preprocessing_option.name}}}. Run the preprocessor first.",
+        )
 
     metrics: list[dict[str, Any]] = []
     shape_rows: list[dict[str, Any]] = []
@@ -155,8 +160,7 @@ def run_feature_extractor(
         for trial_file in track(
             iterable=trial_files,
             description="Extracting feature with "
-            f"option {{{feature_extraction_option.name}}} for "
-            f"option {{{preprocessing_option.name}}}",
+            f"option {{{feature_extraction_option.name}}}",
             context="Feature Extractor",
         ):
             out_path = staging_dir / f"{trial_file.stem}.joblib"
@@ -210,6 +214,9 @@ def run_feature_extractor(
             "feature_dataframe_shape",
             "segments",
         ]
+
+        if not shape_rows:
+            raise ValueError("No feature rows were collected; check trial inputs.")
 
         first = shape_rows[0]
         if all(row == first for row in shape_rows[1:]):
