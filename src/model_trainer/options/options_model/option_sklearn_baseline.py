@@ -32,6 +32,7 @@ __all__ = [
 
 
 def _build_logreg() -> LogisticRegression:
+    # Speed grade:  A  –  very fast; linear, closed-form / LBFGS
     return LogisticRegression(
         max_iter=500,
         n_jobs=-1,
@@ -40,6 +41,7 @@ def _build_logreg() -> LogisticRegression:
 
 
 def _build_rf_regression() -> RandomForestRegressor:
+    # Speed grade:  B  –  200 trees, embarrassingly parallel, still O(N·log N)
     return RandomForestRegressor(
         n_estimators=200,
         random_state=23,
@@ -48,6 +50,7 @@ def _build_rf_regression() -> RandomForestRegressor:
 
 
 def _build_rf_classification() -> RandomForestClassifier:
+    # Speed grade:  B  –  same complexity as regressor; balanced weights add ~0 %
     return RandomForestClassifier(
         n_estimators=200,
         random_state=23,
@@ -57,6 +60,7 @@ def _build_rf_classification() -> RandomForestClassifier:
 
 
 def _build_svc_rbf() -> SVC:
+    # Speed grade:  C  –  cubic in #samples; 1 M rows → hours / infeasible
     return SVC(
         kernel="rbf",
         gamma="scale",
@@ -66,6 +70,7 @@ def _build_svc_rbf() -> SVC:
 
 
 def _build_linear_svc() -> LinearSVC:
+    # Speed grade:  A  –  linear, primal optimisation, O(N) per epoch
     return LinearSVC(
         C=1.0,
         class_weight="balanced",
@@ -73,6 +78,7 @@ def _build_linear_svc() -> LinearSVC:
 
 
 def _build_svr_rbf() -> SVR:
+    # Speed grade:  C  –  same cubic wall as SVC; avoid on >50 k samples
     return SVR(
         kernel="rbf",
         gamma="scale",
@@ -82,10 +88,12 @@ def _build_svr_rbf() -> SVR:
 
 
 def _build_gb_regression() -> GradientBoostingRegressor:
+    # Speed grade:  B  –  sequential boosting; 200 iter ≈ 2× slower than RF
     return GradientBoostingRegressor(random_state=23)
 
 
 def _build_sgd_classifier() -> SGDClassifier:
+    # Speed grade:  A  –  one-pass stochastic, streaming friendly
     return SGDClassifier(
         loss="log_loss",
         penalty="l2",
@@ -96,10 +104,12 @@ def _build_sgd_classifier() -> SGDClassifier:
 
 
 def _build_ridge_regression() -> Ridge:
+    # Speed grade:  A  –  closed-form or iterative, linear complexity
     return Ridge(alpha=1.0, random_state=23)
 
 
 def _build_elasticnet_regression() -> ElasticNet:
+    # Speed grade:  A  –  coordinate descent, linear; just a tad slower than Ridge
     return ElasticNet(alpha=0.001, l1_ratio=0.5, random_state=23)
 
 

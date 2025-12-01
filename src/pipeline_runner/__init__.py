@@ -137,7 +137,3 @@ def run_pipeline(
 
             for model_training_option in model_training_options:
                 run_model_trainer(model_training_option=model_training_option)
-
-
-# Backwards compatibility with existing imports
-run_pipeline_runner = run_pipeline
