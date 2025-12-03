@@ -66,28 +66,25 @@ def _hash_params(params: dict[str, Any]) -> str:
     return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
 
-def _load_existing_param_hashes(results_root: Path) -> dict[str, list[Path]]:
+def _load_existing_param_hashes(target_dir: Path) -> dict[str, list[Path]]:
     """Return mapping of param hashes to existing run directories."""
     hashes: dict[str, list[Path]] = {}
-    if not results_root.exists():
+    if not target_dir.exists():
         return hashes
 
-    for target_dir in results_root.iterdir():
-        if not target_dir.is_dir():
+    for run_dir in target_dir.iterdir():
+        if not run_dir.is_dir():
             continue
-        for run_dir in target_dir.iterdir():
-            if not run_dir.is_dir():
-                continue
-            hash_path = run_dir / "params.sha256"
-            if not hash_path.exists():
-                continue
-            try:
-                hash_value = hash_path.read_text(encoding="utf-8").strip()
-            except OSError:
-                continue
-            if not hash_value:
-                continue
-            hashes.setdefault(hash_value, []).append(run_dir)
+        hash_path = run_dir / "params.sha256"
+        if not hash_path.exists():
+            continue
+        try:
+            hash_value = hash_path.read_text(encoding="utf-8").strip()
+        except OSError:
+            continue
+        if not hash_value:
+            continue
+        hashes.setdefault(hash_value, []).append(run_dir)
     return hashes
 
 
@@ -692,7 +689,7 @@ def _persist_run_artifacts(
             joblib.dump(value=model_artifact, filename=full_artifact_path, compress=3)
 
 
-def run_model_trainer(model_training_option: ModelTrainingOption) -> None:
+def run_model_trainer(model_training_option: ModelTrainingOption) -> Any:
     """
     Train the supplied option end-to-end and persist metrics atomically.
 
@@ -714,7 +711,11 @@ def run_model_trainer(model_training_option: ModelTrainingOption) -> None:
     training_option = model_training_option.training_option
     params_payload = model_training_option.to_params()
     params_hash = _hash_params(params=params_payload)
-    existing_hashes = _load_existing_param_hashes(results_root=RESULTS_ROOT)
+    existing_hashes = _load_existing_param_hashes(
+        target_dir=RESULTS_ROOT
+        / training_option.training_data_option.build_dataset_option.target
+        / training_option.training_data_option.build_dataset_option.target_kind
+    )
     existing_runs = _collect_existing_runs_for_hash(
         params_hash=params_hash,
         existing_hashes=existing_hashes,
@@ -728,7 +729,7 @@ def run_model_trainer(model_training_option: ModelTrainingOption) -> None:
                 description="Skipping run; existing results were kept.",
                 context="Model Trainer",
             )
-            return
+            return None
         _remove_existing_runs(existing_runs=existing_runs)
 
     run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
@@ -759,3 +760,5 @@ def run_model_trainer(model_training_option: ModelTrainingOption) -> None:
         splits_payload=data_option.segment_splits,
         model_artifact=model_artifact,
     )
+
+    return metrics_payload
