@@ -111,34 +111,35 @@ def prompt_confirm(
 
     value = default
 
-    while True:
-        # Set up alarm if timeout is requested
-        if timeout_seconds is not None:
-            signal.signal(signal.SIGALRM, _handle_timeout)
-            signal.alarm(int(timeout_seconds))
-
-        try:
-            response = console.input(f"[magenta]{prompt}[/magenta] {suffix} ")
-            # Cancel alarm once input succeeded
+    if timeout_seconds is not None:
+        while True:
+            # Set up alarm if timeout is requested
             if timeout_seconds is not None:
-                signal.alarm(0)
-        except _InputTimeout:
-            console.print(
-                "[magenta]Timed out waiting for input,"
-                f"defaulting to {default}.[/magenta]"
-            )
-            break
+                signal.signal(signal.SIGALRM, _handle_timeout)
+                signal.alarm(int(timeout_seconds))
 
-        response = response.strip()
-        if not response:
-            break
-        if response[0].lower() == "y":
-            value = True
-            break
-        if response[0].lower() == "n":
-            value = False
-            break
-        console.print("[red]Please respond with 'y' or 'n'.[/red]")
+            try:
+                response = console.input(f"[magenta]{prompt}[/magenta] {suffix} ")
+                # Cancel alarm once input succeeded
+                if timeout_seconds is not None:
+                    signal.alarm(0)
+            except _InputTimeout:
+                console.print(
+                    "[magenta]Timed out waiting for input,"
+                    f"defaulting to {default}.[/magenta]"
+                )
+                break
+
+            response = response.strip()
+            if not response:
+                break
+            if response[0].lower() == "y":
+                value = True
+                break
+            if response[0].lower() == "n":
+                value = False
+                break
+            console.print("[red]Please respond with 'y' or 'n'.[/red]")
 
     print("")
 

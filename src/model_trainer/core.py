@@ -104,8 +104,6 @@ def _confirm_overwrite_existing_runs(
             f"Identical params hash {params_hash} already exists at {run_dirs}. "
             "Overwrite existing results?"
         ),
-        default=False,
-        timeout_seconds=3,
     )
 
 
@@ -659,7 +657,7 @@ def _persist_run_artifacts(
     metrics_payload: dict[str, Any],
     splits_payload: dict[str, list[int]],
     model_artifact: Any,
-) -> None:
+) -> Path:
     """Atomically write params, metrics, splits, and model artifacts to disk."""
     backend = model_training_option.training_option.training_method_option.backend
     target_dir = model_training_option.get_run_dir(run_timestamp=run_timestamp)
@@ -687,6 +685,8 @@ def _persist_run_artifacts(
             torch.save(obj=model_artifact, f=full_artifact_path)
         else:
             joblib.dump(value=model_artifact, filename=full_artifact_path, compress=3)
+
+    return target_dir
 
 
 def run_model_trainer(model_training_option: ModelTrainingOption) -> Any:
@@ -751,7 +751,8 @@ def run_model_trainer(model_training_option: ModelTrainingOption) -> Any:
 
     metrics_payload["run_timestamp"] = run_timestamp
     metrics_payload["params_hash"] = params_hash
-    _persist_run_artifacts(
+
+    result_dir = _persist_run_artifacts(
         model_training_option=model_training_option,
         run_timestamp=run_timestamp,
         params_payload=params_payload,
@@ -760,5 +761,6 @@ def run_model_trainer(model_training_option: ModelTrainingOption) -> Any:
         splits_payload=data_option.segment_splits,
         model_artifact=model_artifact,
     )
+    message(context="Model Trainer", description=f"Result written in {result_dir}")
 
     return metrics_payload
