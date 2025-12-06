@@ -9,8 +9,8 @@ BUILD_DATASET_OPTIONS = OptionList(
         BuildDatasetOption(
             target=target,
             random_seed=42,
-            use_size=1.0,
-            test_size=0.2,
+            use_size=use_size,
+            test_size=0.2,  # Force test_size to 0.2 for consistency, do not overwrite
             target_kind=target_kind,
             feature_scaler=feature_scaler,
         )

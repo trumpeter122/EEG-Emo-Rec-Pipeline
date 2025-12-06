@@ -4,6 +4,8 @@ Replicate the research papers by adding them as pipelines into the project.
 
 If the research paper does not provide enough information for building a pipeline for replication (for example, not providing the list of used EEG channels or not providing the model architecture), approximate by using already existent options or adding new options.
 
+If the research paper's pipeline is in compatible with the project's pipeline framework, coerce them to follow the project's framework (for example, classification pipelines using different classes than 1-9 should be forced to use the 1-9 classes in this project). Try to approximate the research pipeline as close as possible as long as it follows the projects set up.
+
 Write the implementation details in the sections down below.
 
 ## Research Paper 01

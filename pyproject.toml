@@ -24,3 +24,6 @@ dependencies = [
   "torchaudio>=2.9.0",
   "torchvision>=0.24.0",
 ]
+
+[tool.uv]
+cache-dir = "./.uv_cache"
