@@ -58,4 +58,4 @@ Implementation Detail: EEGLAB/BCILAB-style end-to-end preprocessing and feature 
 
 ## Research Paper 13
 
-Implementation Detail: **TODO**
+Implementation Detail: Bi-hemispheric discrepancy-inspired deep pipeline using clean preprocessing, full 32-channel montage (`standard_32`), differential entropy with asymmetry features to emphasize hemispheric differences (`deasm`), 2 s / 0.25 s sliding windows (`w2.00_s0.25`), and a CNN classifier (`cnn1d_n1_classification`) trained with Adam on a full-use 70/30 valence classification split with standard scaling (`valence+use1.00+test0.30+seed42+classification+standard`). This approximates the paper’s hemispheric traversal + discrepancy network within the project framework.
