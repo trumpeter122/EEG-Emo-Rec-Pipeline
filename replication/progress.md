@@ -18,7 +18,7 @@ Implementation Detail: Emotiv-style minimal pipeline using AF3/F4/FC6 channels (
 
 ## Research Paper 03
 
-Implementation Detail: **TODO**
+Implementation Detail: Tutorial/review-inspired deep pipeline using full DEAP montage (`standard_32`), clean preprocessing (`clean`), differential entropy features (`de`), 2 s sliding windows with 0.25 s step (`w2.00_s0.25`), CNN-based classifier (`cnn1d_n1_classification`) trained with Adam, and a 70/30 valence classification split with standard scaling (`valence+use1.00+test0.30+seed42+classification+standard`). This approximates the paper’s handcrafted-feature + deep classifier route discussed for DBNs/CNNs over PSD/DE features.
 
 ## Research Paper 04
 
