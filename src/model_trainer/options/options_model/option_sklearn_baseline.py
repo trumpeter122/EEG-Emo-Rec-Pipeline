@@ -12,6 +12,7 @@ from sklearn.ensemble import (
 )
 from sklearn.linear_model import (
     ElasticNet,
+    LinearRegression,
     LogisticRegression,
     Ridge,
     SGDClassifier,
@@ -29,6 +30,7 @@ __all__ = [
     "_sklearn_svr_rbf",
     "_sklearn_gb_regression",
     "_sklearn_linear_svc",
+    "_sklearn_linear_regression",
     "_sklearn_sgd_classifier",
     "_sklearn_ridge_regression",
     "_sklearn_elasticnet_regression",
@@ -114,6 +116,11 @@ def _build_ridge_regression() -> Ridge:
     return Ridge(alpha=1.0, random_state=23)
 
 
+def _build_linear_regression() -> LinearRegression:
+    # Speed grade:  A  –  closed-form O(D^3) solve; fits small/medium features
+    return LinearRegression(n_jobs=-1)
+
+
 def _build_elasticnet_regression() -> ElasticNet:
     # Speed grade:  A  –  coordinate descent, linear; just a tad slower than Ridge
     return ElasticNet(alpha=0.001, l1_ratio=0.5, random_state=23)
@@ -193,6 +200,13 @@ _sklearn_sgd_classifier = ModelOption(
 _sklearn_ridge_regression = ModelOption(
     name="ridge_regression_sklearn",
     model_builder=_build_ridge_regression,
+    target_kind="regression",
+    backend="sklearn",
+)
+
+_sklearn_linear_regression = ModelOption(
+    name="linear_regression_sklearn",
+    model_builder=_build_linear_regression,
     target_kind="regression",
     backend="sklearn",
 )

@@ -42,7 +42,7 @@ Implementation Detail: Wavelet-coefficient NN ensemble approximated with DEAP by
 
 ## Research Paper 09
 
-Implementation Detail: **TODO**
+Implementation Detail: Visual RSVP/object-recognition inspired replication using minimal filtering (`unclean`), a posterior/parietal occipital pick approximating the paper’s 17-channel layout (`posterior_parietal_14`), zero-mean raw waveform features (`raw_waveform`), short 1 s windows with 0.25 s hop to mirror the paper’s downsampled epochs (`w1.00_s0.25`), and a linear regression mapper (`linear_regression_sklearn`) on a valence regression split with standard scaling (`valence+use1.00+test0.20+seed42+regression+standard`). This mirrors the paper’s linear DNN-to-EEG encoding focus with downsampled posterior activity while fitting the project’s DEAP framework.
 
 ## Research Paper 10
 
