@@ -22,7 +22,7 @@ Implementation Detail: Tutorial/review-inspired deep pipeline using full DEAP mo
 
 ## Research Paper 04
 
-Implementation Detail: **TODO**
+Implementation Detail: Subject-dependent Emotiv replication with the paper’s 4 frontal channels (FC5, F4, F7, AF3 as `emotiv_frontal_4`), Higuchi FD + 36 HOC + 6 statistical features combined and z-scored across channels (`hoc_stat_fd_frontal4`), 4 s windows with 1 s step (`w4.00_s1.00`), clean preprocessing, and SVM classifier (`svc_rbf_sklearn`) on a 70/30 valence classification split (`valence+use1.00+test0.30+seed42+classification+standard`). Window length matches the 512-sample (~4 s) segments with 75% overlap used in the paper.
 
 ## Research Paper 05
 
