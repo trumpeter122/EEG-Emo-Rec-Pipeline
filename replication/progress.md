@@ -30,7 +30,7 @@ Implementation Detail: Expert epileptic-detection model approximated with DEAP b
 
 ## Research Paper 06
 
-Implementation Detail: **TODO**
+Implementation Detail: Neural-mass-inspired spectral replication using clean preprocessing, full 32-channel montage (`standard_32`), PSD bandpower features (`psd`), 2 s / 0.25 s sliding windows (`w2.00_s0.25`), ridge regression model (`ridge_regression_sklearn`) with the sklearn regression trainer, and a 70/30 valence regression split with standard scaling (`valence+use1.00+test0.20+seed42+regression+standard`). This emphasizes frequency-domain dynamics akin to the paper’s spectral modeling focus within the project’s valence target schema.
 
 ## Research Paper 07
 
