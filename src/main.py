@@ -211,4 +211,21 @@ def run_research_paper_08() -> None:
     )
 
 
-run_research_paper_08()
+def run_research_paper_09() -> None:
+    """Replicate Research Paper 09 configuration."""
+    run_pipeline(
+        preprocessing_options=PREPROCESSING_OPTIONS.get_names(["unclean"]),
+        channel_pick_options=CHANNEL_PICK_OPTIONS.get_names(["posterior_parietal_14"]),
+        feature_options=FEATURE_OPTIONS.get_names(["raw_waveform"]),
+        segmentation_options=SEGMENTATION_OPTIONS.get_names(["w1.00_s0.25"]),
+        model_options=MODEL_OPTIONS.get_names(["linear_regression_sklearn"]),
+        build_dataset_options=BUILD_DATASET_OPTIONS.get_names(
+            ["valence+use1.00+test0.20+seed42+regression+standard"]
+        ),
+        training_method_options=TRAINING_METHOD_OPTIONS.get_names(
+            ["sklearn_default_regression"]
+        ),
+    )
+
+
+run_research_paper_09()

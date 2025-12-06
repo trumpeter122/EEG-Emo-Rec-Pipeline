@@ -10,6 +10,7 @@ from .option_sklearn_baseline import (
     _sklearn_elasticnet_regression,
     _sklearn_gb_regression,
     _sklearn_knn_classifier,
+    _sklearn_linear_regression,
     _sklearn_linear_svc,
     _sklearn_logreg,
     _sklearn_qda_classifier,
@@ -59,6 +60,7 @@ MODEL_OPTIONS: OptionList[ModelOption] = OptionList(
         _sklearn_gb_regression,
         _sklearn_sgd_classifier,
         _sklearn_ridge_regression,
+        _sklearn_linear_regression,
         _sklearn_elasticnet_regression,
     ],
 )

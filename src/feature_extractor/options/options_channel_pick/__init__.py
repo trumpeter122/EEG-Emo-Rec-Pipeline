@@ -55,6 +55,25 @@ CHANNEL_PICK_OPTIONS: OptionList = OptionList(
             channel_pick=["AF3", "AF4", "F3", "F4", "FC1", "FC2", "P3", "P4"],
         ),
         ChannelPickOption(
+            name="posterior_parietal_14",
+            channel_pick=[
+                "PO3",
+                "PO4",
+                "O1",
+                "O2",
+                "Oz",
+                "P3",
+                "P4",
+                "P7",
+                "P8",
+                "Pz",
+                "CP1",
+                "CP2",
+                "CP5",
+                "CP6",
+            ],
+        ),
+        ChannelPickOption(
             name="frontal_full_10",
             channel_pick=[
                 "Fp1",
