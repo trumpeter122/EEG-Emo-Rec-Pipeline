@@ -34,7 +34,7 @@ Implementation Detail: Neural-mass-inspired spectral replication using clean pre
 
 ## Research Paper 07
 
-Implementation Detail: **TODO**
+Implementation Detail: Wavelet-coefficient + neural network approximation using clean preprocessing with full 32 channels (`standard_32`), wavelet energy/entropy/statistical features (`wavelet_energy_entropy_stats`), 2 s/0.25 s windows (`w2.00_s0.25`), and CNN classifier (`cnn1d_n1_classification`) trained with Adam on a 70/30 valence classification split (`valence+use1.00+test0.30+seed42+classification+standard`). This mirrors the paper’s DWT feature extraction feeding neural network ensembles within the project’s pipeline constraints.
 
 ## Research Paper 08
 
