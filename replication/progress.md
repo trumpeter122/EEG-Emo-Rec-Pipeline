@@ -10,7 +10,7 @@ Write the implementation details in the sections down below.
 
 ## Research Paper 01
 
-Implementation Detail: **TODO**
+Implementation Detail: Added a db4 wavelet energy/entropy + statistical feature extractor (`wavelet_energy_entropy_stats`), a 4-channel prefrontal/frontal pick (`frontal_prefrontal_4`), and a 2 s non-overlapping window (`w2.00_s2.00`). Replication runs use `ica_clean` preprocessing (aligns with the paper’s BSS artifact removal), the new 70/30 dataset split options (`test0.30` variants), and sklearn classifiers covering SVM RBF (`svc_rbf_sklearn`), KNN, and QDA via `sklearn_default_classification`; class labels are coerced to the project’s 1–9 valence/arousal scheme.
 
 ## Research Paper 02
 

@@ -73,3 +73,23 @@ print(
 
 # Add more here
 # run_pipeline()
+
+
+def run_research_paper_01() -> None:
+    """Replicate Research Paper 01 configuration."""
+    run_pipeline(
+        preprocessing_options=PREPROCESSING_OPTIONS.get_names(["ica_clean"]),
+        channel_pick_options=CHANNEL_PICK_OPTIONS.get_names(["frontal_prefrontal_4"]),
+        feature_options=FEATURE_OPTIONS.get_names(["wavelet_energy_entropy_stats"]),
+        segmentation_options=SEGMENTATION_OPTIONS.get_names(["w2.00_s2.00"]),
+        model_options=MODEL_OPTIONS.get_names(["svc_rbf_sklearn"]),
+        build_dataset_options=BUILD_DATASET_OPTIONS.get_names(
+            ["valence+use1.00+test0.20+seed42+classification+standard"]
+        ),
+        training_method_options=TRAINING_METHOD_OPTIONS.get_names(
+            ["sklearn_default_classification"]
+        ),
+    )
+
+
+run_research_paper_01()
