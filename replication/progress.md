@@ -46,7 +46,7 @@ Implementation Detail: Visual RSVP/object-recognition inspired replication using
 
 ## Research Paper 10
 
-Implementation Detail: **TODO**
+Implementation Detail: Epilepsy-oriented DWT + K-means + MLP setup approximated with clean preprocessing, full 32-channel DEAP montage (`standard_32`), db4 wavelet energy/entropy/statistical features (`wavelet_energy_entropy_stats`) as a surrogate for clustered wavelet distributions, long 4 s non-overlapping windows (`w4.00_s4.00`), and a torch MLP classifier (`mlp_classification`) trained with Adam on a valence classification split using full data and 30% test holdout with standard scaling (`valence+use1.00+test0.30+seed42+classification+standard`). Mirrors the paper’s wavelet subband representation feeding an MLP while fitting the project’s pipeline.
 
 ## Research Paper 11
 

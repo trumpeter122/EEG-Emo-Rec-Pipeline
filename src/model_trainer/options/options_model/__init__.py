@@ -6,6 +6,7 @@ from config.option_utils import OptionList
 from model_trainer.types import ModelOption
 
 from .option_cnn1d_n1 import CNN1D_N1
+from .option_mlp import _mlp_classification
 from .option_sklearn_baseline import (
     _sklearn_elasticnet_regression,
     _sklearn_gb_regression,
@@ -49,6 +50,7 @@ MODEL_OPTIONS: OptionList[ModelOption] = OptionList(
     options=[
         _cnn1d_n1_regression,
         _cnn1d_n1_classification,
+        _mlp_classification,
         _sklearn_logreg,
         _sklearn_rf_regression,
         _sklearn_rf_classification,

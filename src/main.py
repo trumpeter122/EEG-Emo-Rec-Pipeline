@@ -228,4 +228,21 @@ def run_research_paper_09() -> None:
     )
 
 
-run_research_paper_09()
+def run_research_paper_10() -> None:
+    """Replicate Research Paper 10 configuration."""
+    run_pipeline(
+        preprocessing_options=PREPROCESSING_OPTIONS.get_names(["clean"]),
+        channel_pick_options=CHANNEL_PICK_OPTIONS.get_names(["standard_32"]),
+        feature_options=FEATURE_OPTIONS.get_names(["wavelet_energy_entropy_stats"]),
+        segmentation_options=SEGMENTATION_OPTIONS.get_names(["w4.00_s4.00"]),
+        model_options=MODEL_OPTIONS.get_names(["mlp_classification"]),
+        build_dataset_options=BUILD_DATASET_OPTIONS.get_names(
+            ["valence+use1.00+test0.30+seed42+classification+standard"]
+        ),
+        training_method_options=TRAINING_METHOD_OPTIONS.get_names(
+            ["adam_classification"]
+        ),
+    )
+
+
+run_research_paper_10()
