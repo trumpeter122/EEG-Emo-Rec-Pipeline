@@ -14,7 +14,7 @@ Implementation Detail: Added a db4 wavelet energy/entropy + statistical feature 
 
 ## Research Paper 02
 
-Implementation Detail: **TODO**
+Implementation Detail: Emotiv-style minimal pipeline using AF3/F4/FC6 channels (`emotiv_frontal_3`) with Higuchi fractal-dimension features plus AF3–F4 asymmetry (`higuchi_fd_frontal`), 4 s non-overlapping windows (`w4.00_s4.00`), unfiltered DEAP resample (`unclean` preprocessing), linear SVM classifier (`linear_svc_sklearn`), and 70/30 valence classification split with standard scaling (`valence+use1.00+test0.30+seed42+classification+standard`). This approximates the paper’s 1024-sample Higuchi FD thresholds and 6-emotion mapping within the project’s valence/arousal framework.
 
 ## Research Paper 03
 

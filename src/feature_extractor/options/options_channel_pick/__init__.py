@@ -19,6 +19,10 @@ CHANNEL_PICK_OPTIONS: OptionList = OptionList(
             channel_pick=["Fp1", "Fp2", "F3", "F4"],
         ),
         ChannelPickOption(
+            name="emotiv_frontal_3",
+            channel_pick=["AF3", "F4", "FC6"],
+        ),
+        ChannelPickOption(
             name="minimal_temporal_augmented",
             channel_pick=["Fp1", "Fp2", "T7", "T8"],
         ),

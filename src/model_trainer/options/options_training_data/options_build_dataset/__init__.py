@@ -10,13 +10,14 @@ BUILD_DATASET_OPTIONS = OptionList(
             target=target,
             random_seed=42,
             use_size=use_size,
-            test_size=0.2,  # Force test_size to 0.2 for consistency, do not overwrite
+            test_size=test_size,
             target_kind=target_kind,
             feature_scaler=feature_scaler,
         )
-        for target, use_size, target_kind, feature_scaler in product(
+        for target, use_size, test_size, target_kind, feature_scaler in product(
             ["valence", "arousal"],
             [1.0, 0.3],
+            [0.2, 0.3],
             ["classification", "regression"],
             ["standard", "minmax"],
         )
