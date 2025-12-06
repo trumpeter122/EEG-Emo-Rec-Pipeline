@@ -38,7 +38,7 @@ Implementation Detail: Wavelet-coefficient + neural network approximation using 
 
 ## Research Paper 08
 
-Implementation Detail: **TODO**
+Implementation Detail: Wavelet-coefficient NN ensemble approximated with DEAP by using clean preprocessing, full 32 channels (`standard_32`), differential entropy features (`de`) as surrogate wavelet/statistical inputs, 2 s/0.25 s windows (`w2.00_s0.25`), linear SVM classifier (`linear_svc_sklearn`), and a 70/30 valence classification split with standard scaling (`valence+use1.00+test0.30+seed42+classification+standard`). This reflects the paper’s time–frequency DWT feature extraction feeding neural networks/linear separators.
 
 ## Research Paper 09
 
