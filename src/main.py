@@ -245,4 +245,23 @@ def run_research_paper_10() -> None:
     )
 
 
-run_research_paper_10()
+def run_research_paper_11() -> None:
+    """Replicate Research Paper 11 configuration."""
+    run_pipeline(
+        preprocessing_options=PREPROCESSING_OPTIONS.get_names(["clean"]),
+        channel_pick_options=CHANNEL_PICK_OPTIONS.get_names(
+            ["minimal_temporal_augmented"]
+        ),
+        feature_options=FEATURE_OPTIONS.get_names(["psd"]),
+        segmentation_options=SEGMENTATION_OPTIONS.get_names(["w1.00_s0.25"]),
+        model_options=MODEL_OPTIONS.get_names(["svr_rbf_sklearn"]),
+        build_dataset_options=BUILD_DATASET_OPTIONS.get_names(
+            ["valence+use1.00+test0.20+seed42+regression+standard"]
+        ),
+        training_method_options=TRAINING_METHOD_OPTIONS.get_names(
+            ["sklearn_default_regression"]
+        ),
+    )
+
+
+run_research_paper_11()
