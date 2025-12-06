@@ -26,7 +26,7 @@ Implementation Detail: Subject-dependent Emotiv replication with the paper’s 4
 
 ## Research Paper 05
 
-Implementation Detail: **TODO**
+Implementation Detail: Expert epileptic-detection model approximated with DEAP by using clean preprocessing, full 32-channel montage (`standard_32`), PSD bandpower features (`psd`), 2 s/0.25 s sliding windows (`w2.00_s0.25`), and an RBF SVM classifier (`svc_rbf_sklearn`) on a 70/30 valence classification split with standard scaling (`valence+use1.00+test0.30+seed42+classification+standard`). This mirrors the paper’s energy-based spectral focus and SVM classifier within the project’s valence/arousal framework.
 
 ## Research Paper 06
 
