@@ -50,7 +50,7 @@ Implementation Detail: Epilepsy-oriented DWT + K-means + MLP setup approximated 
 
 ## Research Paper 11
 
-Implementation Detail: **TODO**
+Implementation Detail: SEEG computational-model approximation using clean preprocessing, temporal-focused montage (`minimal_temporal_augmented`) to emulate hippocampal depth emphasis, PSD bandpower features (`psd`), short 1 s windows with 0.25 s hop to capture pre-onset fast oscillations (`w1.00_s0.25`), and an RBF SVR regressor (`svr_rbf_sklearn`) on a valence regression split with full data and 20% test holdout using standard scaling (`valence+use1.00+test0.20+seed42+regression+standard`). This mirrors the paper’s spectral parameter-identification over interictal-to-ictal transitions within the project framework.
 
 ## Research Paper 12
 
