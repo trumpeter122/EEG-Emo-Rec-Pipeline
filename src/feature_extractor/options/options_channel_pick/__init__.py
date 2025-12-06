@@ -15,6 +15,10 @@ CHANNEL_PICK_OPTIONS: OptionList = OptionList(
         ),
         ChannelPickOption(name="minimal_frontopolar", channel_pick=["Fp1", "Fp2"]),
         ChannelPickOption(
+            name="frontal_prefrontal_4",
+            channel_pick=["Fp1", "Fp2", "F3", "F4"],
+        ),
+        ChannelPickOption(
             name="minimal_temporal_augmented",
             channel_pick=["Fp1", "Fp2", "T7", "T8"],
         ),

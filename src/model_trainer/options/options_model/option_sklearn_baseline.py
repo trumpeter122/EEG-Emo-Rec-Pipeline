@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from sklearn.discriminant_analysis import (
+    QuadraticDiscriminantAnalysis,
+)  # type: ignore[import-untyped]
 from sklearn.ensemble import (
     GradientBoostingRegressor,  # type: ignore[import-untyped]
     RandomForestClassifier,  # type: ignore[import-untyped]
@@ -13,6 +16,7 @@ from sklearn.linear_model import (
     Ridge,
     SGDClassifier,
 )  # type: ignore[import-untyped]
+from sklearn.neighbors import KNeighborsClassifier  # type: ignore[import-untyped]
 from sklearn.svm import SVC, SVR, LinearSVC  # type: ignore[import-untyped]
 
 from model_trainer.types import ModelOption
@@ -28,6 +32,8 @@ __all__ = [
     "_sklearn_sgd_classifier",
     "_sklearn_ridge_regression",
     "_sklearn_elasticnet_regression",
+    "_sklearn_knn_classifier",
+    "_sklearn_qda_classifier",
 ]
 
 
@@ -113,6 +119,21 @@ def _build_elasticnet_regression() -> ElasticNet:
     return ElasticNet(alpha=0.001, l1_ratio=0.5, random_state=23)
 
 
+def _build_knn_classifier() -> KNeighborsClassifier:
+    # Speed grade:  B  –  neighbours scale with samples; distance-weighted
+    return KNeighborsClassifier(
+        n_neighbors=5,
+        weights="distance",
+        metric="euclidean",
+        n_jobs=-1,
+    )
+
+
+def _build_qda_classifier() -> QuadraticDiscriminantAnalysis:
+    # Speed grade:  A  –  closed-form class covariance with mild regularisation
+    return QuadraticDiscriminantAnalysis(reg_param=0.01)
+
+
 _sklearn_logreg = ModelOption(
     name="logreg_sklearn",
     model_builder=_build_logreg,
@@ -180,6 +201,20 @@ _sklearn_elasticnet_regression = ModelOption(
     name="elasticnet_regression_sklearn",
     model_builder=_build_elasticnet_regression,
     target_kind="regression",
+    backend="sklearn",
+)
+
+_sklearn_knn_classifier = ModelOption(
+    name="knn_classifier_sklearn",
+    model_builder=_build_knn_classifier,
+    target_kind="classification",
+    backend="sklearn",
+)
+
+_sklearn_qda_classifier = ModelOption(
+    name="qda_classifier_sklearn",
+    model_builder=_build_qda_classifier,
+    target_kind="classification",
     backend="sklearn",
 )
 """Baseline sklearn estimators for non-deep-learning experiments."""
