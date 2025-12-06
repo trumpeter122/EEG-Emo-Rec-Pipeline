@@ -264,4 +264,21 @@ def run_research_paper_11() -> None:
     )
 
 
-run_research_paper_11()
+def run_research_paper_12() -> None:
+    """Replicate Research Paper 12 configuration."""
+    run_pipeline(
+        preprocessing_options=PREPROCESSING_OPTIONS.get_names(["ica_clean"]),
+        channel_pick_options=CHANNEL_PICK_OPTIONS.get_names(["standard_32"]),
+        feature_options=FEATURE_OPTIONS.get_names(["deasm"]),
+        segmentation_options=SEGMENTATION_OPTIONS.get_names(["w2.00_s0.25"]),
+        model_options=MODEL_OPTIONS.get_names(["logreg_sklearn"]),
+        build_dataset_options=BUILD_DATASET_OPTIONS.get_names(
+            ["valence+use1.00+test0.30+seed42+classification+standard"]
+        ),
+        training_method_options=TRAINING_METHOD_OPTIONS.get_names(
+            ["sklearn_default_classification"]
+        ),
+    )
+
+
+run_research_paper_12()

@@ -54,7 +54,7 @@ Implementation Detail: SEEG computational-model approximation using clean prepro
 
 ## Research Paper 12
 
-Implementation Detail: **TODO**
+Implementation Detail: EEGLAB/BCILAB-style end-to-end preprocessing and feature pipeline using ICA-cleaned data (`ica_clean`), full 32-channel montage (`standard_32`), differential entropy plus asymmetry features to approximate source-informed measures (`deasm`), standard 2 s / 0.25 s sliding windows (`w2.00_s0.25`), and a fast logistic regression classifier (`logreg_sklearn`) trained via the sklearn classification method on a valence split with full data and 30% test holdout with standard scaling (`valence+use1.00+test0.30+seed42+classification+standard`). This mirrors the paper’s ICA-centric, source/BCI-friendly workflow within the project constraints.
 
 ## Research Paper 13
 
