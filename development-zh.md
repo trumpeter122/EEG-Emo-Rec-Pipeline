@@ -82,12 +82,14 @@
 
 路径：`src/model_trainer/options/options_training_data/options_build_dataset/__init__.py`
 类型：
-`BuildDatasetOption(target: str, random_seed: int, use_size: float, test_size: float, target_kind: Literal["regression","classification"], feature_scaler: Literal["none","standard","minmax"])`
+`BuildDatasetOption(target: str, random_seed: int, use_size: float, test_size: float, target_kind: Literal["regression","classification","classification_5","classification_3"], feature_scaler: Literal["none","standard","minmax"])`
 
 行为：
 
 * `use_size` 和 `test_size` 必须分别属于 `(0,1]` 和 `(0,1)`；通过 `random_seed` 确保划分可复现。
 * 分类任务默认假定类别标签为 `1..9`；option 会将标签编码为索引并记录映射。
+  - `classification_5` 将 9 级标签压缩为 5 桶：`1-2`、`3-4`、`5`、`6-7`、`8-9`。
+  - `classification_3` 将 9 级标签压缩为 3 桶：`1-3`、`4-6`、`7-9`。
 * `feature_scaler` 按 segment 进行缩放：`standard` 与 `minmax` 会在内部自动进行 flatten / reshape；`none` 则直接传递原始值。
 
 步骤：
@@ -295,4 +297,3 @@ PY
   uv run pyright src
   ```
 * [ ] 确认新的产物写入预期的 `data/` 或 `results/` 路径，并且元数据 JSON 文件可以无错误地序列化。
-

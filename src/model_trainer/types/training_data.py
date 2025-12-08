@@ -14,6 +14,12 @@ from sklearn.preprocessing import (  # type: ignore[import-untyped]
     StandardScaler,
 )
 
+from model_trainer.types.target_kind import (
+    TargetKind,
+    collapse_classification_labels,
+    expected_class_labels,
+    is_classification_kind,
+)
 from .dataset import SegmentDataset
 
 if TYPE_CHECKING:
@@ -32,7 +38,7 @@ class BuildDatasetOption:
     random_seed: int
     use_size: float
     test_size: float
-    target_kind: Literal["regression", "classification"]
+    target_kind: TargetKind
     feature_scaler: Literal["none", "standard", "minmax"]
 
     name: str = field(init=False)
@@ -41,6 +47,7 @@ class BuildDatasetOption:
 
     def __post_init__(self) -> None:
         self._validate_sizes()
+        self.class_labels_expected = expected_class_labels(self.target_kind)
         self.name = "+".join(
             [
                 self.target,
@@ -51,8 +58,6 @@ class BuildDatasetOption:
                 f"{self.feature_scaler}",
             ],
         )
-
-        self.class_labels_expected = [float(index) for index in range(1, 10)]
 
     def _validate_sizes(self) -> None:
         if not 0 < self.use_size <= 1:
@@ -159,7 +164,12 @@ class TrainingDataOption:
 
     def _encode_targets(self, frame: pd.DataFrame) -> pd.DataFrame:
         values = frame.loc[:, self.build_dataset_option.target].to_numpy(copy=True)
-        if self.build_dataset_option.target_kind == "classification":
+        target_kind = self.build_dataset_option.target_kind
+        if is_classification_kind(target_kind):
+            values = collapse_classification_labels(
+                values=values,
+                target_kind=target_kind,
+            )
             if self.build_dataset_option.class_labels_expected is not None:
                 unique_values = [
                     float(value)
@@ -191,7 +201,7 @@ class TrainingDataOption:
             self._target_dtype = np.dtype(np.int64)
             frame = frame.copy()
             frame.loc[:, self.build_dataset_option.target] = encoded
-        elif self.build_dataset_option.target_kind == "regression":
+        elif target_kind == "regression":
             frame = frame.copy()
             frame.loc[:, self.build_dataset_option.target] = values.astype(np.float32)
             self.build_dataset_option.class_labels = None

@@ -30,6 +30,7 @@ from sklearn.metrics import (  # type: ignore[import-untyped]
 )
 
 from config.constants import RESULTS_ROOT
+from model_trainer.types.target_kind import TargetKind, is_classification_kind
 from utils import message, prompt_confirm, spinner, track
 from utils.fs import atomic_directory
 
@@ -52,7 +53,6 @@ if TYPE_CHECKING:
 
 __all__ = ["run_model_trainer"]
 ZERO_DIVISION: Any = 0
-TargetKind = Literal["regression", "classification"]
 
 
 def _hash_params(params: dict[str, Any]) -> str:
@@ -500,31 +500,31 @@ def _train_torch_model(
     data_option = training_option.training_data_option
     method_option = training_option.training_method_option
     target_kind: TargetKind = data_option.build_dataset_option.target_kind
+    resolved_output_size = model_training_option.resolved_output_size
 
     _seed_torch(random_seed=data_option.build_dataset_option.random_seed)
     device = _select_device(device_name=method_option.device)
 
     model_option = model_training_option.model_option
-    if target_kind == "classification":
+    if resolved_output_size is None:
+        raise RuntimeError("Torch backend requires a resolved output_size.")
+    if is_classification_kind(target_kind):
         if class_values_array is None:
             raise RuntimeError("classification targets are missing class labels.")
-        if (
-            model_option.output_size is None
-            or len(class_values_array) != model_option.output_size
-        ):
+        if len(class_values_array) != resolved_output_size:
             raise ValueError(
-                "Model output size must match the number of classification labels.",
+                "Resolved output size must match the number of classification labels.",
             )
-    elif model_option.output_size != 1:
+    elif resolved_output_size != 1:
         raise ValueError("Regression models must use output_size=1.")
 
-    raw_model = model_option.build_model()
+    raw_model = model_option.build_model(output_size=resolved_output_size)
     torch_model = cast("torch.nn.Module", raw_model)
     model = torch_model.to(device=device)
     optimizer = method_option.build_optimizer(model=model)
     criterion = method_option.build_criterion().to(device=device)
     class_values_tensor: torch.Tensor | None = None
-    if target_kind == "classification" and class_values_array is not None:
+    if is_classification_kind(target_kind) and class_values_array is not None:
         class_values_tensor = torch.tensor(
             class_values_array,
             dtype=torch.float32,
