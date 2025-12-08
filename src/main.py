@@ -315,4 +315,17 @@ def run_research_paper_14() -> None:
     )
 
 
+# run_research_paper_01() # SVC_RBF: TLDR
+run_research_paper_02()
+run_research_paper_03()
+# run_research_paper_04() # SVC_RBF: TLDR
+# run_research_paper_05() # SVC_RBF: TLDR
+run_research_paper_06()
+run_research_paper_08()
+run_research_paper_09()
+run_research_paper_10()
+# run_research_paper_11() # SVC_RBF: TLDR
+run_research_paper_12()
+run_research_paper_13()
 run_research_paper_14()
+# run_research_paper_07() # CNN: TL
