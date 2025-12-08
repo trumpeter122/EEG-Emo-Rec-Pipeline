@@ -3,7 +3,7 @@ from pathlib import Path
 # Data layout
 DEAP_ROOT = Path("./data/DEAP")
 RESULTS_ROOT = Path("./results")
-RESULTS_ROOT.mkdir(parents=True, exist_ok=True)
+# RESULTS_ROOT.mkdir(parents=True, exist_ok=True)
 DEAP_ORIGINAL = DEAP_ROOT / "DEAP-Dataset" / "data_original"
 DEAP_RATINGS_CSV = (
     DEAP_ROOT / "DEAP-Dataset" / "metadata_csv" / "participant_ratings.csv"
