@@ -15,6 +15,18 @@ CHANNEL_PICK_OPTIONS: OptionList = OptionList(
         ),
         ChannelPickOption(name="minimal_frontopolar", channel_pick=["Fp1", "Fp2"]),
         ChannelPickOption(
+            name="frontal_prefrontal_4",
+            channel_pick=["Fp1", "Fp2", "F3", "F4"],
+        ),
+        ChannelPickOption(
+            name="emotiv_frontal_3",
+            channel_pick=["AF3", "F4", "FC6"],
+        ),
+        ChannelPickOption(
+            name="emotiv_frontal_4",
+            channel_pick=["FC5", "F4", "F7", "AF3"],
+        ),
+        ChannelPickOption(
             name="minimal_temporal_augmented",
             channel_pick=["Fp1", "Fp2", "T7", "T8"],
         ),
@@ -41,6 +53,25 @@ CHANNEL_PICK_OPTIONS: OptionList = OptionList(
         ChannelPickOption(
             name="optimized_relief_nmi",
             channel_pick=["AF3", "AF4", "F3", "F4", "FC1", "FC2", "P3", "P4"],
+        ),
+        ChannelPickOption(
+            name="posterior_parietal_14",
+            channel_pick=[
+                "PO3",
+                "PO4",
+                "O1",
+                "O2",
+                "Oz",
+                "P3",
+                "P4",
+                "P7",
+                "P8",
+                "Pz",
+                "CP1",
+                "CP2",
+                "CP5",
+                "CP6",
+            ],
         ),
         ChannelPickOption(
             name="frontal_full_10",

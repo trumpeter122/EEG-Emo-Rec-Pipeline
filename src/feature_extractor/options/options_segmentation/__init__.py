@@ -7,7 +7,11 @@ __all__ = ["SEGMENTATION_OPTIONS"]
 
 SEGMENTATION_OPTIONS: OptionList[SegmentationOption] = OptionList(
     options=[
+        SegmentationOption(time_window=1.0, time_step=0.25),
         SegmentationOption(time_window=2.0, time_step=0.25),
+        SegmentationOption(time_window=2.0, time_step=2.0),
         SegmentationOption(time_window=3.0, time_step=0.15),
+        SegmentationOption(time_window=4.0, time_step=4.0),
+        SegmentationOption(time_window=4.0, time_step=1.0),
     ],
 )
