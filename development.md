@@ -68,11 +68,13 @@ Rules:
 
 ### 3) Dataset-Building Options
 Path: `src/model_trainer/options/options_training_data/options_build_dataset/__init__.py`  
-Type: `BuildDatasetOption(target: str, random_seed: int, use_size: float, test_size: float, target_kind: Literal["regression","classification"], feature_scaler: Literal["none","standard","minmax"])`
+Type: `BuildDatasetOption(target: str, random_seed: int, use_size: float, test_size: float, target_kind: Literal["regression","classification","classification_5","classification_3"], feature_scaler: Literal["none","standard","minmax"])`
 
 Behavior:
 - `use_size` and `test_size` must be within `(0,1]` and `(0,1)` respectively; the splits are reproducible via `random_seed`.
-- Classification defaults expect class labels `1..9`; the option encodes labels to indices and records the mapping.
+- Classification defaults expect class labels `1..9`; the option encodes labels to indices and records the mapping.  
+  - `classification_5` collapses scores into 5 bins: `1-2`, `3-4`, `5`, `6-7`, `8-9`.  
+  - `classification_3` collapses scores into 3 bins: `1-3`, `4-6`, `7-9`.
 - `feature_scaler` is applied per-segment: `standard` and `minmax` flatten/reshape automatically; `none` passes through raw values.
 
 Steps:

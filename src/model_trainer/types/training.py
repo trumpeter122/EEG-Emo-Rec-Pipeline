@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
+from model_trainer.types.target_kind import target_kinds_compatible
+
 if TYPE_CHECKING:
     from torch.utils.data import DataLoader
 
@@ -37,9 +39,9 @@ class TrainingOption:
         """
         Post-initialization to validate target kinds and build data loaders.
         """
-        if (
-            self.training_method_option.target_kind
-            != self.training_data_option.build_dataset_option.target_kind
+        if not target_kinds_compatible(
+            self.training_method_option.target_kind,
+            self.training_data_option.build_dataset_option.target_kind,
         ):
             raise ValueError(
                 "training_method_option target_kind must match"

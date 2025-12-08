@@ -17,13 +17,14 @@ from config.option_utils import (
     OptimizerBuilder,
     _callable_path,
 )
+from model_trainer.types.target_kind import TargetKind
 
 BatchFormatter = Callable[
     [
         torch.Tensor,
         torch.Tensor,
         torch.device,
-        Literal["regression", "classification"],
+        TargetKind,
     ],
     tuple[torch.Tensor, torch.Tensor],
 ]
@@ -34,7 +35,7 @@ TrainEpochFn = Callable[
         Optimizer,
         nn.Module,
         torch.device,
-        Literal["regression", "classification"],
+        TargetKind,
         torch.Tensor | None,
         BatchFormatter,
     ],
@@ -46,7 +47,7 @@ EvaluateEpochFn = Callable[
         "DataLoader[tuple[np.ndarray, float]]",
         nn.Module,
         torch.device,
-        Literal["regression", "classification"],
+        TargetKind,
         torch.Tensor | None,
         BatchFormatter,
     ],
@@ -57,7 +58,7 @@ PredictionCollector = Callable[
         nn.Module,
         "DataLoader[tuple[np.ndarray, float]]",
         torch.device,
-        Literal["regression", "classification"],
+        TargetKind,
         np.ndarray | None,
         BatchFormatter,
     ],
@@ -86,7 +87,7 @@ class TrainingMethodOption:
     """
 
     name: str
-    target_kind: Literal["regression", "classification"]
+    target_kind: TargetKind
     backend: Literal["torch", "sklearn"] = "torch"
     epochs: int | None = None
     batch_size: int | None = None

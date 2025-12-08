@@ -18,7 +18,7 @@ BUILD_DATASET_OPTIONS = OptionList(
             ["valence", "arousal"],
             [1.0, 0.3],
             [0.2, 0.3],
-            ["classification", "regression"],
+            ["classification", "classification_5", "classification_3", "regression"],
             ["standard", "minmax"],
         )
     ]

@@ -6,6 +6,10 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from config.constants import RESULTS_ROOT
+from model_trainer.types.target_kind import (
+    is_classification_kind,
+    target_kinds_compatible,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -34,6 +38,7 @@ class ModelTrainingOption:
     model_option: ModelOption
     training_option: TrainingOption
     name: str = field(init=False)
+    resolved_output_size: int | None = field(init=False)
 
     def __post_init__(self) -> None:
         """Validate that the model and dataset target kinds agree."""
@@ -46,17 +51,15 @@ class ModelTrainingOption:
                 "training_option.training_method_option backend.",
             )
         data_option = self.training_option.training_data_option
-        if (
-            self.model_option.target_kind
-            != data_option.build_dataset_option.target_kind
+        if not target_kinds_compatible(
+            self.model_option.target_kind,
+            data_option.build_dataset_option.target_kind,
         ):
             raise ValueError(
                 "model_option target_kind must match training_data_option target_kind.",
             )
-        if (
-            self.model_option.backend == "torch"
-            and self.model_option.output_size is None
-        ):
+        self.resolved_output_size = self._resolve_output_size()
+        if self.model_option.backend == "torch" and self.resolved_output_size is None:
             raise ValueError("output_size must be set for torch backends.")
         self.name = "+".join(
             [
@@ -65,12 +68,24 @@ class ModelTrainingOption:
             ],
         )
 
+    def _resolve_output_size(self) -> int | None:
+        if self.model_option.backend != "torch":
+            return None
+        data_option = self.training_option.training_data_option
+        target_kind = data_option.build_dataset_option.target_kind
+        if is_classification_kind(target_kind):
+            class_labels = data_option.build_dataset_option.class_labels
+            if class_labels is None:
+                raise ValueError("class_labels must be set for classification targets.")
+            return len(class_labels)
+        return 1
+
     def get_run_dir(self, *, run_timestamp: str) -> Path:
         """Directory where model artifacts (weights + metrics) are written."""
         target_root = (
             RESULTS_ROOT
             / self.training_option.training_data_option.build_dataset_option.target
-            / self.model_option.target_kind
+            / self.training_option.training_data_option.build_dataset_option.target_kind
         )
         return target_root / run_timestamp
 
@@ -106,6 +121,8 @@ class ModelTrainingOption:
         """Serialize the aggregated model + training configuration."""
         return {
             "name": self.name,
-            "model_option": self.model_option.to_params(),
+            "model_option": self.model_option.to_params(
+                resolved_output_size=self.resolved_output_size,
+            ),
             "training_option": self.training_option.to_params(),
         }

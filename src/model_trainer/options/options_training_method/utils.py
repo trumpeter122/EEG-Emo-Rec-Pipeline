@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
 import numpy as np
 import torch
 import torch.nn.functional as F
+from model_trainer.types.target_kind import TargetKind, is_classification_kind
 
 if TYPE_CHECKING:
     from torch import nn
@@ -36,13 +37,13 @@ def format_conv1d_batch(
     features: torch.Tensor,
     targets: torch.Tensor,
     device: torch.device,
-    target_kind: Literal["regression", "classification"],
+    target_kind: TargetKind,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Move tensors onto ``device`` and normalize dtypes for Conv1d models."""
     formatted_features = _ensure_conv1d_shape(
         features.to(device=device, dtype=torch.float32),
     )
-    if target_kind == "classification":
+    if is_classification_kind(target_kind):
         formatted_targets = targets.to(device=device, dtype=torch.long)
     else:
         formatted_targets = targets.to(device=device, dtype=torch.float32)
@@ -73,7 +74,7 @@ def train_epoch_conv1d(
     optimizer: Optimizer,
     criterion: nn.Module,
     device: torch.device,
-    target_kind: Literal["regression", "classification"],
+    target_kind: TargetKind,
     class_values: torch.Tensor | None,
     batch_formatter: BatchFormatter,
 ) -> tuple[float, float]:
@@ -98,7 +99,7 @@ def train_epoch_conv1d(
 
         batch_size = labels.size(0)
         total_loss += float(loss.item()) * batch_size
-        if target_kind == "classification":
+        if is_classification_kind(target_kind):
             if class_values is None:
                 raise RuntimeError(
                     "class_values tensor is required for classification."
@@ -119,7 +120,7 @@ def evaluate_epoch_conv1d(
     loader: DataLoader[tuple[np.ndarray, float]],
     criterion: nn.Module,
     device: torch.device,
-    target_kind: Literal["regression", "classification"],
+    target_kind: TargetKind,
     class_values: torch.Tensor | None,
     batch_formatter: BatchFormatter,
 ) -> tuple[float, float]:
@@ -142,7 +143,7 @@ def evaluate_epoch_conv1d(
 
             batch_size = labels.size(0)
             total_loss += float(loss.item()) * batch_size
-            if target_kind == "classification":
+            if is_classification_kind(target_kind):
                 if class_values is None:
                     raise RuntimeError(
                         "class_values tensor is required for classification.",
@@ -162,7 +163,7 @@ def collect_predictions_conv1d(
     model: nn.Module,
     loader: DataLoader[tuple[np.ndarray, float]],
     device: torch.device,
-    target_kind: Literal["regression", "classification"],
+    target_kind: TargetKind,
     class_values: np.ndarray | None,
     batch_formatter: BatchFormatter,
 ) -> tuple[np.ndarray, np.ndarray]:
@@ -180,7 +181,7 @@ def collect_predictions_conv1d(
                 target_kind,
             )
             outputs = model(inputs)
-            if target_kind == "classification":
+            if is_classification_kind(target_kind):
                 pred_indices = torch.argmax(outputs, dim=1, keepdim=True)
                 preds.append(pred_indices.detach().cpu().numpy())
                 trues.append(labels.detach().cpu().unsqueeze(1).cpu().numpy())
@@ -193,7 +194,7 @@ def collect_predictions_conv1d(
 
     pred_array = np.concatenate(preds, axis=0).reshape(-1)
     true_array = np.concatenate(trues, axis=0).reshape(-1)
-    if target_kind == "classification" and class_values is not None:
+    if is_classification_kind(target_kind) and class_values is not None:
         pred_array = class_values[pred_array.astype(int)]
         true_array = class_values[true_array.astype(int)]
     return pred_array, true_array
