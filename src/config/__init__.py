@@ -2,6 +2,7 @@ from importlib import import_module
 from typing import Any
 
 from .constants import *  # noqa: F403
+from .exceptions import MissingAsymmetryPairsError
 from .option_utils import (  # noqa: F401
     CriterionBuilder,
     FeatureChannelExtractionMethod,
@@ -12,6 +13,7 @@ from .option_utils import (  # noqa: F401
 )
 
 __all__ = [
+    "MissingAsymmetryPairsError",
     "PreprocessingOption",
     "ChannelPickOption",
     "FeatureOption",

@@ -2,6 +2,7 @@
 
 import numpy as np
 
+from config import MissingAsymmetryPairsError
 from feature_extractor.types import FeatureOption
 
 from .option_de import _extract_de
@@ -14,6 +15,11 @@ def _extract_deasm(trial_data: np.ndarray, channel_pick: list[str]) -> np.ndarra
     """Compute left-right differential entropy differences."""
     de_feats = _extract_de(trial_data, channel_pick)
     pairs = _available_pairs(channel_pick)
+    if not pairs:
+        raise MissingAsymmetryPairsError(
+            "DEASM requires at least one left/right channel pair; "
+            f"got {channel_pick}."
+        )
     out = np.zeros((len(pairs), de_feats.shape[1]), dtype=np.float32)
     for pair_idx, (left_idx, right_idx, _) in enumerate(pairs):
         out[pair_idx] = de_feats[left_idx] - de_feats[right_idx]

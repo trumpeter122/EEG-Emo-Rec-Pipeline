@@ -2,6 +2,7 @@
 
 import numpy as np
 
+from config import MissingAsymmetryPairsError
 from feature_extractor.types import FeatureOption
 
 from .option_psd import _extract_psd
@@ -14,6 +15,11 @@ def _extract_dasm(trial_data: np.ndarray, channel_pick: list[str]) -> np.ndarray
     """Compute left-right PSD differences."""
     psd_feats = _extract_psd(trial_data, channel_pick)
     pairs = _available_pairs(channel_pick)
+    if not pairs:
+        raise MissingAsymmetryPairsError(
+            "DASM requires at least one left/right channel pair; "
+            f"got {channel_pick}."
+        )
     out = np.zeros((len(pairs), psd_feats.shape[1]), dtype=np.float32)
     for pair_idx, (left_idx, right_idx, _) in enumerate(pairs):
         out[pair_idx] = psd_feats[left_idx] - psd_feats[right_idx]
