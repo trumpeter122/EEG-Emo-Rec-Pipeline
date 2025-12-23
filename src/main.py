@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+import itertools
+import random
+from typing import TYPE_CHECKING
+
+# from config import MissingAsymmetryPairsError
 from feature_extractor.options import (
     CHANNEL_PICK_OPTIONS,
     FEATURE_OPTIONS,
@@ -12,9 +17,17 @@ from model_trainer.options import (
     MODEL_OPTIONS,
     TRAINING_METHOD_OPTIONS,
 )
+from model_trainer.types.target_kind import target_kinds_compatible
 from pipeline_runner import run_pipeline
 from preprocessor.options import PREPROCESSING_OPTIONS
-from typing import Iterable
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from model_trainer.types import (
+        BuildDatasetOption,
+        ModelOption,
+        TrainingMethodOption,
+    )
 
 print(
     "\n".join(
@@ -76,9 +89,7 @@ print(
 # run_pipeline()
 
 
-def _expand_build_dataset_names(
-    names: Iterable[str], *, extend: bool
-) -> list[str]:
+def _expand_build_dataset_names(names: Iterable[str], *, extend: bool) -> list[str]:
     """
     Include collapsed-classification variants when requested.
 
@@ -106,6 +117,42 @@ def _expand_build_dataset_names(
                     expanded.append(candidate)
                     seen.add(candidate)
     return expanded
+
+
+def _validate_combo(
+    *,
+    model_option: ModelOption,
+    build_dataset_option: BuildDatasetOption,
+    training_method_option: TrainingMethodOption,
+) -> tuple[bool, str | None]:
+    if model_option.backend != training_method_option.backend:
+        return (
+            False,
+            "backend mismatch: "
+            f"model={model_option.backend} "
+            f"training_method={training_method_option.backend}",
+        )
+    if not target_kinds_compatible(
+        training_method_option.target_kind,
+        build_dataset_option.target_kind,
+    ):
+        return (
+            False,
+            "target_kind mismatch: "
+            f"training_method={training_method_option.target_kind} "
+            f"dataset={build_dataset_option.target_kind}",
+        )
+    if not target_kinds_compatible(
+        model_option.target_kind,
+        build_dataset_option.target_kind,
+    ):
+        return (
+            False,
+            "target_kind mismatch: "
+            f"model={model_option.target_kind} "
+            f"dataset={build_dataset_option.target_kind}",
+        )
+    return True, None
 
 
 def run_research_paper_01(extend: bool = False) -> None:
@@ -664,32 +711,76 @@ def run_research_paper_14(extend: bool = False) -> None:
         )
 
 
-# run_research_paper_01() # SVC_RBF: TLDR
-run_research_paper_02()
-run_research_paper_03()
-# run_research_paper_04() # SVC_RBF: TLDR
-# run_research_paper_05() # SVC_RBF: TLDR
-run_research_paper_06()
-run_research_paper_08()
-run_research_paper_09()
-run_research_paper_10()
-# run_research_paper_11() # SVC_RBF: TLDR
-run_research_paper_12()
-run_research_paper_13()
-run_research_paper_14()
-# run_research_paper_07() # CNN: TL
+# # run_research_paper_01() # SVC_RBF: TLDR
+# run_research_paper_02()
+# run_research_paper_03()
+# # run_research_paper_04() # SVC_RBF: TLDR
+# # run_research_paper_05() # SVC_RBF: TLDR
+# run_research_paper_06()
+# run_research_paper_08()
+# run_research_paper_09()
+# run_research_paper_10()
+# # run_research_paper_11() # SVC_RBF: TLDR
+# run_research_paper_12()
+# run_research_paper_13()
+# run_research_paper_14()
+# run_research_paper_07()  # CNN: TL
+#
+# # run_research_paper_01(extend=True) # SVC_RBF: TLDR
+# run_research_paper_02(extend=True)
+# run_research_paper_03(extend=True)
+# # run_research_paper_04(extend=True) # SVC_RBF: TLDR
+# # run_research_paper_05(extend=True) # SVC_RBF: TLDR
+# run_research_paper_06(extend=True)
+# run_research_paper_08(extend=True)
+# run_research_paper_09(extend=True)
+# run_research_paper_10(extend=True)
+# # run_research_paper_11(extend=True) # SVC_RBF: TLDR
+# run_research_paper_12(extend=True)
+# run_research_paper_13(extend=True)
+# run_research_paper_14(extend=True)
+# run_research_paper_07(extend=True)  # CNN: TL
 
-# run_research_paper_01(extend=True) # SVC_RBF: TLDR
-run_research_paper_02(extend=True)
-run_research_paper_03(extend=True)
-# run_research_paper_04(extend=True) # SVC_RBF: TLDR
-# run_research_paper_05(extend=True) # SVC_RBF: TLDR
-run_research_paper_06(extend=True)
-run_research_paper_08(extend=True)
-run_research_paper_09(extend=True)
-run_research_paper_10(extend=True)
-# run_research_paper_11(extend=True) # SVC_RBF: TLDR
-run_research_paper_12(extend=True)
-run_research_paper_13(extend=True)
-run_research_paper_14(extend=True)
-# run_research_paper_07(extend=True) # CNN: TL
+full_combos = list(
+    itertools.product(
+        PREPROCESSING_OPTIONS,
+        CHANNEL_PICK_OPTIONS,
+        FEATURE_OPTIONS,
+        SEGMENTATION_OPTIONS,
+        [option for option in MODEL_OPTIONS if "sv" not in option.name],
+        BUILD_DATASET_OPTIONS,
+        TRAINING_METHOD_OPTIONS,
+    )
+)
+random.shuffle(full_combos)
+print(f"Full combos: {len(full_combos)}")
+
+valid_combos = [
+    combo
+    for combo in full_combos
+    if _validate_combo(
+        model_option=combo[4],
+        build_dataset_option=combo[5],
+        training_method_option=combo[6],
+    )[0]
+]
+print(f"Valide combos: {len(valid_combos)}")
+
+for index, combo in enumerate(valid_combos):
+    print(f"\n{index:03}\nRunning combo {combo}")
+    try:
+        run_pipeline(
+            preprocessing_options=combo[0],
+            channel_pick_options=combo[1],
+            feature_options=combo[2],
+            segmentation_options=combo[3],
+            model_options=combo[4],
+            build_dataset_options=combo[5],
+            training_method_options=combo[6],
+        )
+    # except MissingAsymmetryPairsError as e:
+    #     print(e)
+    #     continue
+    except Exception as e:
+        print(e)
+        continue

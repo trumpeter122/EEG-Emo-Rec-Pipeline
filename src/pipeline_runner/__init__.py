@@ -109,30 +109,24 @@ def run_pipeline(
             for training_data_option, training_method_option in product(
                 training_data_options, training_method_options_list
             ):
-                try:
-                    _tmp_training_options.append(
-                        TrainingOption(
-                            training_data_option=training_data_option,
-                            training_method_option=training_method_option,
-                        )
+                _tmp_training_options.append(
+                    TrainingOption(
+                        training_data_option=training_data_option,
+                        training_method_option=training_method_option,
                     )
-                except ValueError:
-                    continue
+                )
             training_options = OptionList(_tmp_training_options)
 
             _tmp_model_training_options = []
             for training_option, model_option in product(
                 training_options, model_options_list
             ):
-                try:
-                    _tmp_model_training_options.append(
-                        ModelTrainingOption(
-                            training_option=training_option,
-                            model_option=model_option,
-                        )
+                _tmp_model_training_options.append(
+                    ModelTrainingOption(
+                        training_option=training_option,
+                        model_option=model_option,
                     )
-                except ValueError:
-                    continue
+                )
             model_training_options = OptionList(_tmp_model_training_options)
 
             for model_training_option in model_training_options:
