@@ -247,7 +247,7 @@ def run_research_paper_03(extend: bool = False) -> None:
             channel_pick_options=CHANNEL_PICK_OPTIONS.get_names(["standard_32"]),
             feature_options=FEATURE_OPTIONS.get_names(["de"]),
             segmentation_options=SEGMENTATION_OPTIONS.get_names(["w2.00_s0.25"]),
-            model_options=MODEL_OPTIONS.get_names(["cnn1d_n1_classification"]),
+            model_options=MODEL_OPTIONS.get_names(["cfcnn_classification"]),
             build_dataset_options=BUILD_DATASET_OPTIONS.get_names(
                 _expand_build_dataset_names(
                     ["valence+use1.00+test0.30+seed42+classification+standard"],
@@ -267,7 +267,7 @@ def run_research_paper_03(extend: bool = False) -> None:
             channel_pick_options=CHANNEL_PICK_OPTIONS,
             feature_options=FEATURE_OPTIONS.get_names(["de"]),
             segmentation_options=SEGMENTATION_OPTIONS.get_names(["w2.00_s0.25"]),
-            model_options=MODEL_OPTIONS.get_names(["cnn1d_n1_classification"]),
+            model_options=MODEL_OPTIONS.get_names(["cfcnn_classification"]),
             build_dataset_options=BUILD_DATASET_OPTIONS.get_names(
                 _expand_build_dataset_names(
                     [base_ds, base_ds.replace("valence", "arousal", 1)],
@@ -405,7 +405,9 @@ def run_research_paper_07(extend: bool = False) -> None:
             channel_pick_options=CHANNEL_PICK_OPTIONS.get_names(["standard_32"]),
             feature_options=FEATURE_OPTIONS.get_names(["wavelet_energy_entropy_stats"]),
             segmentation_options=SEGMENTATION_OPTIONS.get_names(["w2.00_s0.25"]),
-            model_options=MODEL_OPTIONS.get_names(["cnn1d_n1_classification"]),
+            model_options=MODEL_OPTIONS.get_names(
+                ["combined_wavelet_mlp_classification"]
+            ),
             build_dataset_options=BUILD_DATASET_OPTIONS.get_names(
                 _expand_build_dataset_names(
                     ["valence+use1.00+test0.30+seed42+classification+standard"],
@@ -425,7 +427,9 @@ def run_research_paper_07(extend: bool = False) -> None:
             channel_pick_options=CHANNEL_PICK_OPTIONS,
             feature_options=FEATURE_OPTIONS.get_names(["wavelet_energy_entropy_stats"]),
             segmentation_options=SEGMENTATION_OPTIONS.get_names(["w2.00_s0.25"]),
-            model_options=MODEL_OPTIONS.get_names(["cnn1d_n1_classification"]),
+            model_options=MODEL_OPTIONS.get_names(
+                ["combined_wavelet_mlp_classification"]
+            ),
             build_dataset_options=BUILD_DATASET_OPTIONS.get_names(
                 _expand_build_dataset_names(
                     [base_ds, base_ds.replace("valence", "arousal", 1)],
@@ -524,7 +528,9 @@ def run_research_paper_10(extend: bool = False) -> None:
             channel_pick_options=CHANNEL_PICK_OPTIONS.get_names(["standard_32"]),
             feature_options=FEATURE_OPTIONS.get_names(["wavelet_energy_entropy_stats"]),
             segmentation_options=SEGMENTATION_OPTIONS.get_names(["w4.00_s4.00"]),
-            model_options=MODEL_OPTIONS.get_names(["mlp_classification"]),
+            model_options=MODEL_OPTIONS.get_names(
+                ["kmeans_wavelet_mlp_classification"]
+            ),
             build_dataset_options=BUILD_DATASET_OPTIONS.get_names(
                 _expand_build_dataset_names(
                     ["valence+use1.00+test0.30+seed42+classification+standard"],
@@ -544,7 +550,9 @@ def run_research_paper_10(extend: bool = False) -> None:
             channel_pick_options=CHANNEL_PICK_OPTIONS,
             feature_options=FEATURE_OPTIONS.get_names(["wavelet_energy_entropy_stats"]),
             segmentation_options=SEGMENTATION_OPTIONS.get_names(["w4.00_s4.00"]),
-            model_options=MODEL_OPTIONS.get_names(["mlp_classification"]),
+            model_options=MODEL_OPTIONS.get_names(
+                ["kmeans_wavelet_mlp_classification"]
+            ),
             build_dataset_options=BUILD_DATASET_OPTIONS.get_names(
                 _expand_build_dataset_names(
                     [base_ds, base_ds.replace("valence", "arousal", 1)],
@@ -641,9 +649,9 @@ def run_research_paper_13(extend: bool = False) -> None:
         run_pipeline(
             preprocessing_options=PREPROCESSING_OPTIONS.get_names(["clean"]),
             channel_pick_options=CHANNEL_PICK_OPTIONS.get_names(["standard_32"]),
-            feature_options=FEATURE_OPTIONS.get_names(["deasm"]),
+            feature_options=FEATURE_OPTIONS.get_names(["de"]),
             segmentation_options=SEGMENTATION_OPTIONS.get_names(["w2.00_s0.25"]),
-            model_options=MODEL_OPTIONS.get_names(["cnn1d_n1_classification"]),
+            model_options=MODEL_OPTIONS.get_names(["bihdm_classification"]),
             build_dataset_options=BUILD_DATASET_OPTIONS.get_names(
                 _expand_build_dataset_names(
                     ["valence+use1.00+test0.30+seed42+classification+standard"],
@@ -651,7 +659,7 @@ def run_research_paper_13(extend: bool = False) -> None:
                 )
             ),
             training_method_options=TRAINING_METHOD_OPTIONS.get_names(
-                ["adam_classification"]
+                ["sgd_bihdm_classification"]
             ),
         )
     else:
@@ -661,9 +669,9 @@ def run_research_paper_13(extend: bool = False) -> None:
                 ["unclean", "clean", "ica_clean"]
             ),
             channel_pick_options=CHANNEL_PICK_OPTIONS,
-            feature_options=FEATURE_OPTIONS.get_names(["deasm"]),
+            feature_options=FEATURE_OPTIONS.get_names(["de"]),
             segmentation_options=SEGMENTATION_OPTIONS.get_names(["w2.00_s0.25"]),
-            model_options=MODEL_OPTIONS.get_names(["cnn1d_n1_classification"]),
+            model_options=MODEL_OPTIONS.get_names(["bihdm_classification"]),
             build_dataset_options=BUILD_DATASET_OPTIONS.get_names(
                 _expand_build_dataset_names(
                     [base_ds, base_ds.replace("valence", "arousal", 1)],
@@ -671,7 +679,7 @@ def run_research_paper_13(extend: bool = False) -> None:
                 )
             ),
             training_method_options=TRAINING_METHOD_OPTIONS.get_names(
-                ["adam_classification"]
+                ["sgd_bihdm_classification"]
             ),
         )
 
@@ -711,76 +719,76 @@ def run_research_paper_14(extend: bool = False) -> None:
         )
 
 
-# # run_research_paper_01() # SVC_RBF: TLDR
-# run_research_paper_02()
-# run_research_paper_03()
-# # run_research_paper_04() # SVC_RBF: TLDR
-# # run_research_paper_05() # SVC_RBF: TLDR
-# run_research_paper_06()
-# run_research_paper_08()
-# run_research_paper_09()
-# run_research_paper_10()
-# # run_research_paper_11() # SVC_RBF: TLDR
-# run_research_paper_12()
-# run_research_paper_13()
-# run_research_paper_14()
-# run_research_paper_07()  # CNN: TL
+# run_research_paper_01() # SVC_RBF: TLDR
+run_research_paper_02()
+run_research_paper_03()
+# run_research_paper_04() # SVC_RBF: TLDR
+# run_research_paper_05() # SVC_RBF: TLDR
+run_research_paper_06()
+run_research_paper_08()
+run_research_paper_09()
+run_research_paper_10()
+# run_research_paper_11() # SVC_RBF: TLDR
+run_research_paper_12()
+run_research_paper_13()
+run_research_paper_14()
+run_research_paper_07()  # CNN: TL
+
+# run_research_paper_01(extend=True) # SVC_RBF: TLDR
+run_research_paper_02(extend=True)
+run_research_paper_03(extend=True)
+# run_research_paper_04(extend=True) # SVC_RBF: TLDR
+# run_research_paper_05(extend=True) # SVC_RBF: TLDR
+run_research_paper_06(extend=True)
+run_research_paper_08(extend=True)
+run_research_paper_09(extend=True)
+run_research_paper_10(extend=True)
+# run_research_paper_11(extend=True) # SVC_RBF: TLDR
+run_research_paper_12(extend=True)
+run_research_paper_13(extend=True)
+run_research_paper_14(extend=True)
+run_research_paper_07(extend=True)  # CNN: TL
+
+# full_combos = list(
+#     itertools.product(
+#         PREPROCESSING_OPTIONS,
+#         CHANNEL_PICK_OPTIONS,
+#         FEATURE_OPTIONS,
+#         SEGMENTATION_OPTIONS,
+#         [option for option in MODEL_OPTIONS if "sv" not in option.name],
+#         BUILD_DATASET_OPTIONS,
+#         TRAINING_METHOD_OPTIONS,
+#     )
+# )
+# random.shuffle(full_combos)
+# print(f"Full combos: {len(full_combos)}")
 #
-# # run_research_paper_01(extend=True) # SVC_RBF: TLDR
-# run_research_paper_02(extend=True)
-# run_research_paper_03(extend=True)
-# # run_research_paper_04(extend=True) # SVC_RBF: TLDR
-# # run_research_paper_05(extend=True) # SVC_RBF: TLDR
-# run_research_paper_06(extend=True)
-# run_research_paper_08(extend=True)
-# run_research_paper_09(extend=True)
-# run_research_paper_10(extend=True)
-# # run_research_paper_11(extend=True) # SVC_RBF: TLDR
-# run_research_paper_12(extend=True)
-# run_research_paper_13(extend=True)
-# run_research_paper_14(extend=True)
-# run_research_paper_07(extend=True)  # CNN: TL
-
-full_combos = list(
-    itertools.product(
-        PREPROCESSING_OPTIONS,
-        CHANNEL_PICK_OPTIONS,
-        FEATURE_OPTIONS,
-        SEGMENTATION_OPTIONS,
-        [option for option in MODEL_OPTIONS if "sv" not in option.name],
-        BUILD_DATASET_OPTIONS,
-        TRAINING_METHOD_OPTIONS,
-    )
-)
-random.shuffle(full_combos)
-print(f"Full combos: {len(full_combos)}")
-
-valid_combos = [
-    combo
-    for combo in full_combos
-    if _validate_combo(
-        model_option=combo[4],
-        build_dataset_option=combo[5],
-        training_method_option=combo[6],
-    )[0]
-]
-print(f"Valide combos: {len(valid_combos)}")
-
-for index, combo in enumerate(valid_combos):
-    print(f"\n{index:03}\nRunning combo {combo}")
-    try:
-        run_pipeline(
-            preprocessing_options=combo[0],
-            channel_pick_options=combo[1],
-            feature_options=combo[2],
-            segmentation_options=combo[3],
-            model_options=combo[4],
-            build_dataset_options=combo[5],
-            training_method_options=combo[6],
-        )
-    # except MissingAsymmetryPairsError as e:
-    #     print(e)
-    #     continue
-    except Exception as e:
-        print(e)
-        continue
+# valid_combos = [
+#     combo
+#     for combo in full_combos
+#     if _validate_combo(
+#         model_option=combo[4],
+#         build_dataset_option=combo[5],
+#         training_method_option=combo[6],
+#     )[0]
+# ]
+# print(f"Valide combos: {len(valid_combos)}")
+#
+# for index, combo in enumerate(valid_combos):
+#     print(f"\n{index:03}\nRunning combo {combo}")
+#     try:
+#         run_pipeline(
+#             preprocessing_options=combo[0],
+#             channel_pick_options=combo[1],
+#             feature_options=combo[2],
+#             segmentation_options=combo[3],
+#             model_options=combo[4],
+#             build_dataset_options=combo[5],
+#             training_method_options=combo[6],
+#         )
+#     # except MissingAsymmetryPairsError as e:
+#     #     print(e)
+#     #     continue
+#     except Exception as e:
+#         print(e)
+#         continue

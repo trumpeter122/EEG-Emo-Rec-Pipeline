@@ -18,7 +18,7 @@ Implementation Detail: Emotiv-style minimal pipeline using AF3/F4/FC6 channels (
 
 ## Research Paper 03
 
-Implementation Detail: Tutorial/review-inspired deep pipeline using full DEAP montage (`standard_32`), clean preprocessing (`clean`), differential entropy features (`de`), 2 s sliding windows with 0.25 s step (`w2.00_s0.25`), CNN-based classifier (`cnn1d_n1_classification`) trained with Adam, and a 70/30 valence classification split with standard scaling (`valence+use1.00+test0.30+seed42+classification+standard`). This approximates the paper’s handcrafted-feature + deep classifier route discussed for DBNs/CNNs over PSD/DE features.
+Implementation Detail: Tutorial/review-inspired deep pipeline using full DEAP montage (`standard_32`), clean preprocessing (`clean`), differential entropy features (`de`), 2 s sliding windows with 0.25 s step (`w2.00_s0.25`), channel-frequency CNN (`cfcnn_classification`) trained with Adam, and a 70/30 valence classification split with standard scaling (`valence+use1.00+test0.30+seed42+classification+standard`). This mirrors the review's channel-frequency CNN route by reshaping DE bands into channel x band feature maps for 2D convolutions.
 
 ## Research Paper 04
 
@@ -34,7 +34,7 @@ Implementation Detail: Neural-mass-inspired spectral replication using clean pre
 
 ## Research Paper 07
 
-Implementation Detail: Wavelet-coefficient + neural network approximation using clean preprocessing with full 32 channels (`standard_32`), wavelet energy/entropy/statistical features (`wavelet_energy_entropy_stats`), 2 s/0.25 s windows (`w2.00_s0.25`), and CNN classifier (`cnn1d_n1_classification`) trained with Adam on a 70/30 valence classification split (`valence+use1.00+test0.30+seed42+classification+standard`). This mirrors the paper’s DWT feature extraction feeding neural network ensembles within the project’s pipeline constraints.
+Implementation Detail: Wavelet-coefficient + neural network replication using clean preprocessing with full 32 channels (`standard_32`), wavelet energy/entropy/statistical features (`wavelet_energy_entropy_stats`), 2 s/0.25 s windows (`w2.00_s0.25`), and the combined MLP ensemble (`combined_wavelet_mlp_classification`) with three first-level 20-hidden-unit MLPs feeding a 25-hidden-unit second-level combiner, trained with Adam on a 70/30 valence classification split (`valence+use1.00+test0.30+seed42+classification+standard`). This matches the paper’s combined neural network topology.
 
 ## Research Paper 08
 
@@ -46,7 +46,7 @@ Implementation Detail: Visual RSVP/object-recognition inspired replication using
 
 ## Research Paper 10
 
-Implementation Detail: Epilepsy-oriented DWT + K-means + MLP setup approximated with clean preprocessing, full 32-channel DEAP montage (`standard_32`), db4 wavelet energy/entropy/statistical features (`wavelet_energy_entropy_stats`) as a surrogate for clustered wavelet distributions, long 4 s non-overlapping windows (`w4.00_s4.00`), and a torch MLP classifier (`mlp_classification`) trained with Adam on a valence classification split using full data and 30% test holdout with standard scaling (`valence+use1.00+test0.30+seed42+classification+standard`). Mirrors the paper’s wavelet subband representation feeding an MLP while fitting the project’s pipeline.
+Implementation Detail: Epilepsy-oriented DWT + K-means + MLP setup approximated with clean preprocessing, full 32-channel DEAP montage (`standard_32`), db4 wavelet energy/entropy/statistical features (`wavelet_energy_entropy_stats`) as a surrogate for clustered wavelet distributions, long 4 s non-overlapping windows (`w4.00_s4.00`), and a single-hidden-layer MLPNN (`kmeans_wavelet_mlp_classification`, 5 hidden neurons) trained with Adam on a valence classification split using full data and 30% test holdout with standard scaling (`valence+use1.00+test0.30+seed42+classification+standard`). Mirrors the paper’s MLPNN topology while fitting the project’s pipeline.
 
 ## Research Paper 11
 
@@ -58,7 +58,7 @@ Implementation Detail: EEGLAB/BCILAB-style end-to-end preprocessing and feature 
 
 ## Research Paper 13
 
-Implementation Detail: Bi-hemispheric discrepancy-inspired deep pipeline using clean preprocessing, full 32-channel montage (`standard_32`), differential entropy with asymmetry features to emphasize hemispheric differences (`deasm`), 2 s / 0.25 s sliding windows (`w2.00_s0.25`), and a CNN classifier (`cnn1d_n1_classification`) trained with Adam on a full-use 70/30 valence classification split with standard scaling (`valence+use1.00+test0.30+seed42+classification+standard`). This approximates the paper’s hemispheric traversal + discrepancy network within the project framework.
+Implementation Detail: Bi-hemispheric discrepancy replication using clean preprocessing, full 32-channel montage (`standard_32`), differential entropy features (`de`), 2 s / 0.25 s sliding windows (`w2.00_s0.25`), and a BiHDM-inspired hemispheric GRU model (`bihdm_classification`) with subtraction-based pairing, high-level GRU aggregation (dl=32, dg=32, do=16), trained with SGD (`sgd_bihdm_classification`) on a full-use 70/30 valence classification split with standard scaling (`valence+use1.00+test0.30+seed42+classification+standard`). The domain-adversarial branch is omitted because the pipeline does not expose domain labels.
 
 ## Research Paper 14
 
