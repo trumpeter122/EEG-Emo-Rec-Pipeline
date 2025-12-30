@@ -1,0 +1,126 @@
+{
+  "best_epoch": 0,
+  "best_val_loss": null,
+  "total_seconds": 0.009781292988918722,
+  "epochs": [],
+  "train_metrics": {
+    "classification": {
+      "labels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "accuracy": 0.26860119047619047,
+      "balanced_accuracy": 0.25146914267052073,
+      "precision_macro": 0.24891419282640656,
+      "precision_micro": 0.26860119047619047,
+      "precision_weighted": 0.2675128635740545,
+      "recall_macro": 0.25146914267052073,
+      "recall_micro": 0.26860119047619047,
+      "recall_weighted": 0.26860119047619047,
+      "f1_macro": 0.20196705364771023,
+      "f1_micro": 0.26860119047619047,
+      "f1_weighted": 0.22482799295300418,
+      "confusion_matrix": [
+        [
+          462,
+          80,
+          10,
+          195,
+          458
+        ],
+        [
+          675,
+          265,
+          19,
+          346,
+          1354
+        ],
+        [
+          519,
+          249,
+          34,
+          277,
+          1059
+        ],
+        [
+          699,
+          387,
+          31,
+          582,
+          1955
+        ],
+        [
+          607,
+          299,
+          33,
+          578,
+          2267
+        ]
+      ]
+    }
+  },
+  "test_metrics": {
+    "classification": {
+      "labels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "accuracy": 0.2625,
+      "balanced_accuracy": 0.2507247307121662,
+      "precision_macro": 0.24789898297542803,
+      "precision_micro": 0.2625,
+      "precision_weighted": 0.2631218542856214,
+      "recall_macro": 0.2507247307121662,
+      "recall_micro": 0.2625,
+      "recall_weighted": 0.2625,
+      "f1_macro": 0.2001708975109766,
+      "f1_micro": 0.2625,
+      "f1_weighted": 0.21966688324095207,
+      "confusion_matrix": [
+        [
+          197,
+          28,
+          4,
+          77,
+          184
+        ],
+        [
+          273,
+          116,
+          9,
+          144,
+          609
+        ],
+        [
+          212,
+          126,
+          18,
+          137,
+          444
+        ],
+        [
+          283,
+          161,
+          22,
+          237,
+          848
+        ],
+        [
+          266,
+          123,
+          9,
+          289,
+          944
+        ]
+      ]
+    }
+  },
+  "run_timestamp": "20251208_141623_432484",
+  "params_hash": "f6f6e101a3ef2234c5ba07b4276118931cbdccab46d0204134a455b8a683d92e"
+}

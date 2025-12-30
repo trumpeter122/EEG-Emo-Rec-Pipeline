@@ -1,0 +1,94 @@
+{
+  "name": "ica_clean+de+minimal_frontopolar+w2.00_s0.25+arousal+use1.00+test0.30+seed42+classification_5+standard+adam_classification+cfcnn_classification",
+  "model_option": {
+    "name": "cfcnn_classification",
+    "model_builder": "model_trainer.options.options_model._build_cfcnn",
+    "output_size": 5,
+    "target_kind": "classification",
+    "backend": "torch"
+  },
+  "training_option": {
+    "name": "ica_clean+de+minimal_frontopolar+w2.00_s0.25+arousal+use1.00+test0.30+seed42+classification_5+standard+adam_classification",
+    "training_data_option": {
+      "name": "ica_clean+de+minimal_frontopolar+w2.00_s0.25+arousal+use1.00+test0.30+seed42+classification_5+standard",
+      "feature_extraction_option": {
+        "name": "ica_clean+de+minimal_frontopolar+w2.00_s0.25",
+        "preprocessing_option": {
+          "name": "ica_clean",
+          "root_path": "data/DEAP/generated/ica_cleaned",
+          "subject_path": "data/DEAP/generated/ica_cleaned/subject",
+          "subject_metadata_path": "data/DEAP/generated/ica_cleaned/subject/metadata",
+          "subject_metadata_params_path": "data/DEAP/generated/ica_cleaned/subject/metadata/params.json",
+          "subject_metadata_metrics_path": "data/DEAP/generated/ica_cleaned/subject/metadata/metrics.json",
+          "subject_metadata_shape_path": "data/DEAP/generated/ica_cleaned/subject/metadata/shape.csv",
+          "trial_path": "data/DEAP/generated/ica_cleaned/trial",
+          "trial_metadata_path": "data/DEAP/generated/ica_cleaned/trial/metadata",
+          "trial_metadata_params_path": "data/DEAP/generated/ica_cleaned/trial/metadata/params.json",
+          "trial_metadata_metrics_path": "data/DEAP/generated/ica_cleaned/trial/metadata/metrics.json",
+          "trial_metadata_shape_path": "data/DEAP/generated/ica_cleaned/trial/metadata/shape.csv",
+          "metadata_path": "data/DEAP/generated/ica_cleaned/trial/metadata",
+          "metadata_params_path": "data/DEAP/generated/ica_cleaned/trial/metadata/params.json",
+          "metadata_metrics_path": "data/DEAP/generated/ica_cleaned/trial/metadata/metrics.json",
+          "metadata_shape_path": "data/DEAP/generated/ica_cleaned/trial/metadata/shape.csv",
+          "feature_path": "data/DEAP/generated/ica_cleaned/feature"
+        },
+        "feature_option": {
+          "name": "de",
+          "feature_channel_extraction_method": "feature_extractor.options.options_feature.option_de._extract_de"
+        },
+        "channel_pick_option": {
+          "name": "minimal_frontopolar",
+          "channel_pick": [
+            "Fp1",
+            "Fp2"
+          ]
+        },
+        "segmentation_option": {
+          "name": "w2.00_s0.25",
+          "time_window": 2.0,
+          "time_step": 0.25
+        }
+      },
+      "build_dataset_option": {
+        "name": "arousal+use1.00+test0.30+seed42+classification_5+standard",
+        "target": "arousal",
+        "random_seed": 42,
+        "use_size": 1.0,
+        "test_size": 0.3,
+        "target_kind": "classification_5",
+        "feature_scaler": "standard",
+        "class_labels": [
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0
+        ],
+        "class_labels_expected": [
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0
+        ]
+      }
+    },
+    "training_method_option": {
+      "name": "adam_classification",
+      "epochs": 30,
+      "batch_size": 256,
+      "optimizer_builder": "model_trainer.options.options_training_method.option_adam_classification._optimizer_builder",
+      "criterion_builder": "model_trainer.options.options_training_method.option_adam_classification._criterion_builder",
+      "num_workers": 0,
+      "pin_memory": false,
+      "drop_last": false,
+      "target_kind": "classification",
+      "backend": "torch",
+      "batch_formatter": "model_trainer.options.options_training_method.utils.format_conv1d_batch",
+      "train_epoch_fn": "model_trainer.options.options_training_method.utils.train_epoch_conv1d",
+      "evaluate_epoch_fn": "model_trainer.options.options_training_method.utils.evaluate_epoch_conv1d",
+      "prediction_collector": "model_trainer.options.options_training_method.utils.collect_predictions_conv1d",
+      "fit_kwargs": {}
+    }
+  }
+}

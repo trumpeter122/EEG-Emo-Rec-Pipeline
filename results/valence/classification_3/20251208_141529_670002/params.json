@@ -1,0 +1,92 @@
+{
+  "name": "clean+higuchi_fd_frontal+frontal_prefrontal_4+w4.00_s4.00+valence+use1.00+test0.30+seed42+classification_3+standard+sklearn_default_classification+linear_svc_sklearn",
+  "model_option": {
+    "name": "linear_svc_sklearn",
+    "model_builder": "model_trainer.options.options_model.option_sklearn_baseline._build_linear_svc",
+    "output_size": null,
+    "target_kind": "classification",
+    "backend": "sklearn"
+  },
+  "training_option": {
+    "name": "clean+higuchi_fd_frontal+frontal_prefrontal_4+w4.00_s4.00+valence+use1.00+test0.30+seed42+classification_3+standard+sklearn_default_classification",
+    "training_data_option": {
+      "name": "clean+higuchi_fd_frontal+frontal_prefrontal_4+w4.00_s4.00+valence+use1.00+test0.30+seed42+classification_3+standard",
+      "feature_extraction_option": {
+        "name": "clean+higuchi_fd_frontal+frontal_prefrontal_4+w4.00_s4.00",
+        "preprocessing_option": {
+          "name": "clean",
+          "root_path": "data/DEAP/generated/cleaned",
+          "subject_path": "data/DEAP/generated/cleaned/subject",
+          "subject_metadata_path": "data/DEAP/generated/cleaned/subject/metadata",
+          "subject_metadata_params_path": "data/DEAP/generated/cleaned/subject/metadata/params.json",
+          "subject_metadata_metrics_path": "data/DEAP/generated/cleaned/subject/metadata/metrics.json",
+          "subject_metadata_shape_path": "data/DEAP/generated/cleaned/subject/metadata/shape.csv",
+          "trial_path": "data/DEAP/generated/cleaned/trial",
+          "trial_metadata_path": "data/DEAP/generated/cleaned/trial/metadata",
+          "trial_metadata_params_path": "data/DEAP/generated/cleaned/trial/metadata/params.json",
+          "trial_metadata_metrics_path": "data/DEAP/generated/cleaned/trial/metadata/metrics.json",
+          "trial_metadata_shape_path": "data/DEAP/generated/cleaned/trial/metadata/shape.csv",
+          "metadata_path": "data/DEAP/generated/cleaned/trial/metadata",
+          "metadata_params_path": "data/DEAP/generated/cleaned/trial/metadata/params.json",
+          "metadata_metrics_path": "data/DEAP/generated/cleaned/trial/metadata/metrics.json",
+          "metadata_shape_path": "data/DEAP/generated/cleaned/trial/metadata/shape.csv",
+          "feature_path": "data/DEAP/generated/cleaned/feature"
+        },
+        "feature_option": {
+          "name": "higuchi_fd_frontal",
+          "feature_channel_extraction_method": "feature_extractor.options.options_feature.option_higuchi_fd._extract_higuchi_fd"
+        },
+        "channel_pick_option": {
+          "name": "frontal_prefrontal_4",
+          "channel_pick": [
+            "Fp1",
+            "Fp2",
+            "F3",
+            "F4"
+          ]
+        },
+        "segmentation_option": {
+          "name": "w4.00_s4.00",
+          "time_window": 4.0,
+          "time_step": 4.0
+        }
+      },
+      "build_dataset_option": {
+        "name": "valence+use1.00+test0.30+seed42+classification_3+standard",
+        "target": "valence",
+        "random_seed": 42,
+        "use_size": 1.0,
+        "test_size": 0.3,
+        "target_kind": "classification_3",
+        "feature_scaler": "standard",
+        "class_labels": [
+          1.0,
+          2.0,
+          3.0
+        ],
+        "class_labels_expected": [
+          1.0,
+          2.0,
+          3.0
+        ]
+      }
+    },
+    "training_method_option": {
+      "name": "sklearn_default_classification",
+      "epochs": null,
+      "batch_size": null,
+      "optimizer_builder": null,
+      "criterion_builder": null,
+      "num_workers": 0,
+      "pin_memory": false,
+      "drop_last": false,
+      "target_kind": "classification",
+      "backend": "sklearn",
+      "batch_formatter": null,
+      "train_epoch_fn": null,
+      "evaluate_epoch_fn": null,
+      "prediction_collector": null,
+      "fit_kwargs": {}
+    }
+  }
+}

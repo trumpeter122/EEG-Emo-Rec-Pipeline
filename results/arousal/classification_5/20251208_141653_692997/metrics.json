@@ -1,0 +1,126 @@
+{
+  "best_epoch": 0,
+  "best_val_loss": null,
+  "total_seconds": 0.02615708801022265,
+  "epochs": [],
+  "train_metrics": {
+    "classification": {
+      "labels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "accuracy": 0.32410714285714287,
+      "balanced_accuracy": 0.28024779625254426,
+      "precision_macro": 0.28328499131551454,
+      "precision_micro": 0.32410714285714287,
+      "precision_weighted": 0.3129971065039824,
+      "recall_macro": 0.28024779625254426,
+      "recall_micro": 0.32410714285714287,
+      "recall_weighted": 0.32410714285714287,
+      "f1_macro": 0.2580509091584733,
+      "f1_micro": 0.32410714285714287,
+      "f1_weighted": 0.2988922931651755,
+      "confusion_matrix": [
+        [
+          430,
+          149,
+          22,
+          371,
+          188
+        ],
+        [
+          487,
+          441,
+          101,
+          1344,
+          427
+        ],
+        [
+          344,
+          182,
+          129,
+          818,
+          286
+        ],
+        [
+          629,
+          505,
+          165,
+          2656,
+          683
+        ],
+        [
+          410,
+          302,
+          97,
+          1574,
+          700
+        ]
+      ]
+    }
+  },
+  "test_metrics": {
+    "classification": {
+      "labels": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "accuracy": 0.325,
+      "balanced_accuracy": 0.2745789427593498,
+      "precision_macro": 0.28661873405000204,
+      "precision_micro": 0.325,
+      "precision_weighted": 0.3201819179766558,
+      "recall_macro": 0.2745789427593498,
+      "recall_micro": 0.325,
+      "recall_weighted": 0.325,
+      "f1_macro": 0.25670748516437986,
+      "f1_micro": 0.325,
+      "f1_weighted": 0.3033779266391972,
+      "confusion_matrix": [
+        [
+          160,
+          69,
+          17,
+          173,
+          71
+        ],
+        [
+          199,
+          207,
+          40,
+          557,
+          187
+        ],
+        [
+          171,
+          77,
+          60,
+          335,
+          103
+        ],
+        [
+          263,
+          233,
+          66,
+          1156,
+          304
+        ],
+        [
+          220,
+          121,
+          34,
+          648,
+          289
+        ]
+      ]
+    }
+  },
+  "run_timestamp": "20251208_141653_692997",
+  "params_hash": "920e1a2e9b1b689d0b5211f4edb33edbb5fb291aea9c4a79633ccf3c7b008cce"
+}

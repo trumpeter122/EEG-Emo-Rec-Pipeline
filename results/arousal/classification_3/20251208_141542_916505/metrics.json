@@ -1,0 +1,82 @@
+{
+  "best_epoch": 0,
+  "best_val_loss": null,
+  "total_seconds": 0.008846049997373484,
+  "epochs": [],
+  "train_metrics": {
+    "classification": {
+      "labels": [
+        0,
+        1,
+        2
+      ],
+      "accuracy": 0.4297619047619048,
+      "balanced_accuracy": 0.40175441681171553,
+      "precision_macro": 0.40371816289943646,
+      "precision_micro": 0.4297619047619048,
+      "precision_weighted": 0.42757237933197756,
+      "recall_macro": 0.40175441681171553,
+      "recall_micro": 0.4297619047619048,
+      "recall_weighted": 0.4297619047619048,
+      "f1_macro": 0.40178047197901146,
+      "f1_micro": 0.4297619047619048,
+      "f1_weighted": 0.4275742338488892,
+      "confusion_matrix": [
+        [
+          671,
+          782,
+          936
+        ],
+        [
+          874,
+          2280,
+          2398
+        ],
+        [
+          681,
+          1993,
+          2825
+        ]
+      ]
+    }
+  },
+  "test_metrics": {
+    "classification": {
+      "labels": [
+        0,
+        1,
+        2
+      ],
+      "accuracy": 0.4388888888888889,
+      "balanced_accuracy": 0.4092216855002022,
+      "precision_macro": 0.4095046787386487,
+      "precision_micro": 0.4388888888888889,
+      "precision_weighted": 0.4377771205826852,
+      "recall_macro": 0.4092216855002022,
+      "recall_micro": 0.4388888888888889,
+      "recall_weighted": 0.4388888888888889,
+      "f1_macro": 0.4083054401160788,
+      "f1_micro": 0.4388888888888889,
+      "f1_weighted": 0.43703462859780245,
+      "confusion_matrix": [
+        [
+          284,
+          348,
+          369
+        ],
+        [
+          374,
+          994,
+          1030
+        ],
+        [
+          317,
+          794,
+          1250
+        ]
+      ]
+    }
+  },
+  "run_timestamp": "20251208_141542_916505",
+  "params_hash": "e586ebd04199b1429d780734e38b65b0fe6b2db93eb01c94d05350266f481abf"
+}

@@ -1,0 +1,32 @@
+{
+  "best_epoch": 0,
+  "best_val_loss": null,
+  "total_seconds": 0.11144527097349055,
+  "epochs": [],
+  "train_metrics": {
+    "regression": {
+      "mae": 1.7709819078445435,
+      "median_absolute_error": 1.6661288738250732,
+      "mape": 0.5565425753593445,
+      "mse": 4.410940647125244,
+      "rmse": 2.100223951659738,
+      "r2": 0.0264970064163208,
+      "explained_variance": 0.026496946811676025,
+      "max_error": 5.593822479248047
+    }
+  },
+  "test_metrics": {
+    "regression": {
+      "mae": 1.7753604650497437,
+      "median_absolute_error": 1.6633505821228027,
+      "mape": 0.5647439956665039,
+      "mse": 4.435237407684326,
+      "rmse": 2.1060003342080282,
+      "r2": 0.027357101440429688,
+      "explained_variance": 0.02739858627319336,
+      "max_error": 5.252650260925293
+    }
+  },
+  "run_timestamp": "20251226_192341_099000",
+  "params_hash": "9fe90e79f8417c48cef8534ae838ec5be5258a6e0ec40fbe76eeb296bf549a72"
+}

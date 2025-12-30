@@ -1,0 +1,2 @@
+# Ignore model artifacts since they are too large
+**/*.joblib

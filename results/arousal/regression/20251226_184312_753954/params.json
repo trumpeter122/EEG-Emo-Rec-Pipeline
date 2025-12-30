@@ -1,0 +1,86 @@
+{
+  "name": "ica_clean+psd+balanced_classic_6+w2.00_s0.25+arousal+use1.00+test0.20+seed42+regression+standard+sklearn_default_regression+ridge_regression_sklearn",
+  "model_option": {
+    "name": "ridge_regression_sklearn",
+    "model_builder": "model_trainer.options.options_model.option_sklearn_baseline._build_ridge_regression",
+    "output_size": null,
+    "target_kind": "regression",
+    "backend": "sklearn"
+  },
+  "training_option": {
+    "name": "ica_clean+psd+balanced_classic_6+w2.00_s0.25+arousal+use1.00+test0.20+seed42+regression+standard+sklearn_default_regression",
+    "training_data_option": {
+      "name": "ica_clean+psd+balanced_classic_6+w2.00_s0.25+arousal+use1.00+test0.20+seed42+regression+standard",
+      "feature_extraction_option": {
+        "name": "ica_clean+psd+balanced_classic_6+w2.00_s0.25",
+        "preprocessing_option": {
+          "name": "ica_clean",
+          "root_path": "data/DEAP/generated/ica_cleaned",
+          "subject_path": "data/DEAP/generated/ica_cleaned/subject",
+          "subject_metadata_path": "data/DEAP/generated/ica_cleaned/subject/metadata",
+          "subject_metadata_params_path": "data/DEAP/generated/ica_cleaned/subject/metadata/params.json",
+          "subject_metadata_metrics_path": "data/DEAP/generated/ica_cleaned/subject/metadata/metrics.json",
+          "subject_metadata_shape_path": "data/DEAP/generated/ica_cleaned/subject/metadata/shape.csv",
+          "trial_path": "data/DEAP/generated/ica_cleaned/trial",
+          "trial_metadata_path": "data/DEAP/generated/ica_cleaned/trial/metadata",
+          "trial_metadata_params_path": "data/DEAP/generated/ica_cleaned/trial/metadata/params.json",
+          "trial_metadata_metrics_path": "data/DEAP/generated/ica_cleaned/trial/metadata/metrics.json",
+          "trial_metadata_shape_path": "data/DEAP/generated/ica_cleaned/trial/metadata/shape.csv",
+          "metadata_path": "data/DEAP/generated/ica_cleaned/trial/metadata",
+          "metadata_params_path": "data/DEAP/generated/ica_cleaned/trial/metadata/params.json",
+          "metadata_metrics_path": "data/DEAP/generated/ica_cleaned/trial/metadata/metrics.json",
+          "metadata_shape_path": "data/DEAP/generated/ica_cleaned/trial/metadata/shape.csv",
+          "feature_path": "data/DEAP/generated/ica_cleaned/feature"
+        },
+        "feature_option": {
+          "name": "psd",
+          "feature_channel_extraction_method": "feature_extractor.options.options_feature.option_psd._extract_psd"
+        },
+        "channel_pick_option": {
+          "name": "balanced_classic_6",
+          "channel_pick": [
+            "Fp1",
+            "Fp2",
+            "F3",
+            "F4",
+            "P3",
+            "P4"
+          ]
+        },
+        "segmentation_option": {
+          "name": "w2.00_s0.25",
+          "time_window": 2.0,
+          "time_step": 0.25
+        }
+      },
+      "build_dataset_option": {
+        "name": "arousal+use1.00+test0.20+seed42+regression+standard",
+        "target": "arousal",
+        "random_seed": 42,
+        "use_size": 1.0,
+        "test_size": 0.2,
+        "target_kind": "regression",
+        "feature_scaler": "standard",
+        "class_labels": null,
+        "class_labels_expected": null
+      }
+    },
+    "training_method_option": {
+      "name": "sklearn_default_regression",
+      "epochs": null,
+      "batch_size": null,
+      "optimizer_builder": null,
+      "criterion_builder": null,
+      "num_workers": 0,
+      "pin_memory": false,
+      "drop_last": false,
+      "target_kind": "regression",
+      "backend": "sklearn",
+      "batch_formatter": null,
+      "train_epoch_fn": null,
+      "evaluate_epoch_fn": null,
+      "prediction_collector": null,
+      "fit_kwargs": {}
+    }
+  }
+}
